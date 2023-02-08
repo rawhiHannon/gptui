@@ -40,3 +40,153 @@
 .read-the-docs {
   color: #888;
 }
+
+
+.message.me {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.message.me .text {
+  background-color: #636da4;
+  color: white;
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+  height: 600px;
+  background-color: #f2f2f2;
+  border-radius: 10px;
+  margin: 20px auto;
+  box-shadow: 0px 0px 10px #ccc;
+}
+
+.chat-header {
+  display: flex;
+  justify-content: flex-left;
+  align-items: left;
+  background-color: #3f51b5;
+  color: white;
+  padding: 10px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.chat-select {
+  background-color: white;
+  color: white;
+  border: none;
+  font-size: 16px;
+  outline: none;
+  height: 35px
+}
+
+.chat-messages {
+  overflow-y: scroll;
+  flex: 1;
+  padding: 20px;
+  border-bottom: #333f80;
+}
+
+.message {
+  display: flex;
+  align-items: left;
+  margin-bottom: 20px;
+}
+
+.message .text {
+  background-color: white;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px #ccc;
+  max-width: 70%;
+  text-align: left;
+}
+
+.message img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.typing-indicator {
+  text-align: left;
+}
+
+.chat-input {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  background-color: #f2f2f2;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.chat-input input {
+  background-color: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0px 0px 10px #ccc;
+  width: 90%;
+  height: 20px;
+  margin: 5px;
+  outline: none;
+  border: none;
+  font-size: 16px;
+}
+
+.chat-input button {
+  background-color: #3f51b5;
+  color: white;
+  margin: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  height: 39px;
+  transition: all 0.3s ease-in-out;
+  border-radius: 10px;
+}
+
+.chat-input button:hover {
+  background-color: #333;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb {
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+  background: #333f80;
+}
+
+::-webkit-scrollbar-thumb:window-inactive {
+  background: #333f80;
+}
+
+.scroll-box {
+  overflow-y: scroll;
+  height: 200px;
+  border: 1px solid #ccc;
+}
+
+.chat-select {
+  background-color: rgb(247, 247, 247);
+  box-shadow: 0px 0px 8px rgba(255, 255, 255, 0);
+  color: rgb(255, 255, 255);
+  padding: 8px 10px;
+  width: 35%;
+  outline: none;
+  text-transform: uppercase;
+}
