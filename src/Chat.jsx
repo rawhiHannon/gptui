@@ -25,6 +25,9 @@ const Chat = () => {
   };
 
   const receiveChatMessage = (message) => {
+    if(message == "") {
+      return
+    }
     let msg = { 
       id: messages.length + 1, 
       text: message, 
