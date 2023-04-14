@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiSend } from 'react-icons/fi';
+import Draggable from 'react-draggable';
 
 const ChatPreview = ({ agent }) => {
   const [messages, setMessages] = useState([
@@ -12,6 +13,16 @@ const ChatPreview = ({ agent }) => {
         text: "hi",
     },
   ]);
+
+  useEffect(() => {
+    setMessages((prevMessages) => [
+      {
+        type: 'response',
+        text: agent.WelcomingMessage,
+      },
+      prevMessages[1],
+    ]);
+  }, [agent.WelcomingMessage]);
 
   const [inputValue, setInputValue] = useState('');
 
@@ -33,8 +44,9 @@ const ChatPreview = ({ agent }) => {
   };
 
   return (
+    <Draggable handle=".chat-preview-drag-handle">
     <div className="chat-preview" style={{ backgroundColor: agent.ChatBackgroundColor }}>
-      <div className="chat-preview-header">
+      <div className="chat-preview-header chat-preview-drag-handle">
         Agent Buddy
       </div>
       <div className="chat-preview-messages">
@@ -78,6 +90,7 @@ const ChatPreview = ({ agent }) => {
         </div>
       </div>
     </div>
+    </Draggable>
   );
 };
 

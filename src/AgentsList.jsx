@@ -7,7 +7,6 @@ import OtherView from './OtherView';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
-
 const AgentsList = ({ agents }) => {
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [isColorPickerOpen, setIsColorPickerOpen] = useState({});
@@ -37,6 +36,12 @@ const AgentsList = ({ agents }) => {
       console.log(response.data);
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
     }
   };
 
@@ -73,6 +78,7 @@ const AgentsList = ({ agents }) => {
         type="text"
         id={propertyName}
         name={propertyName}
+        onKeyDown={handleKeyDown}
         value={selectedAgent[propertyName]}
         onChange={(e) => handleTextChange(e.target.value, propertyName)
         }
@@ -93,6 +99,10 @@ const AgentsList = ({ agents }) => {
       />
     </FormGroup>
   );
+
+  const handleMove = (dragId, hoverId) => {
+    // Perform the reordering logic here
+  };
 
   return (
     <Container>
@@ -132,6 +142,7 @@ const AgentsList = ({ agents }) => {
             <FormHeading>Edit Agent</FormHeading>
             {renderTextInputFormGroup('Logo', 'Logo')}
             {renderTextInputFormGroup('Chat Icon', 'ChatIcon')}
+            {renderTextInputFormGroup('Input Place holder', 'InputPlaceholder')}
 
             {renderTextInputFormGroup('Welcoming Message', 'WelcomingMessage')}
             {renderTextInputFormGroup('Text Login Page On Close', 'TextLoginPageOnClose')}
@@ -151,7 +162,10 @@ const AgentsList = ({ agents }) => {
             {renderColorPickerFormGroup('Button Background Color', 'ButtonBackgroundColor')}
             {renderColorPickerFormGroup('Button Text Color', 'ButtonTextColor')}
             {/* repeat for all other Agent fields */}
-            <Button type="submit">Save Changes</Button>
+            <div className="form-buttons">
+              <Button className="save-button" type="submit">Save Changes</Button>
+              <Button className="cancel-button" onClick={() => setSelectedAgent(null)} style={{ marginLeft: '10px' }}>Cancel</Button>
+            </div>
           </Form>
           
           <div className="app">
@@ -169,23 +183,56 @@ const AgentsList = ({ agents }) => {
     </Container>
   );
 };
+
 const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   margin: 2rem auto;
   max-width: 80rem;
+  font-family: 'Roboto', sans-serif;
 `;
 
 const TextArea = styled.textarea`
-  padding: 0.5rem;
+  padding: 0.75rem;
   font-size: 1.2rem;
-  border-radius: 0.25rem;
-  border: 1px solid #ccc;
+  border: none;
   width: 100%;
   margin-bottom: 1rem;
-  resize: vertical;
+  resize: none;
+  background-color: transparent;
+
+  &:focus {
+    outline: none;
+  }
+
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: #f5f5f5;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar:hover {
+    cursor: pointer;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+  }
+
+  &::-webkit-scrollbar-button {
+    display: none;
+  }
 `;
+
 
 const Table = styled.table`
   width: 100%;
@@ -208,14 +255,14 @@ const Table = styled.table`
 const Button = styled.button`
   padding: 0.5rem 1rem;
   border: none;
-  border-radius: 0.25rem;
-  background-color: #3498db;
+  border-radius: 0.5rem;
+  background-color: #6c63ff;
   color: #fff;
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
-
+  margin-top: 20px;
   &:hover {
-    background-color: #2980b9;
+    background-color: #4b41d7;
   }
 `;
 
@@ -226,13 +273,14 @@ const CloseIcon = styled.span`
   font-size: 2rem;
   cursor: pointer;
   color: #333;
+  transition: color 0.2s ease-in-out;
+
+  &:hover {
+    color: #6c63ff;
+  }
 `;
 
 const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
 `;
 
 const FormHeading = styled.h2`
@@ -245,22 +293,45 @@ const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
   margin-bottom: 1rem;
-  width: 100%;
+  width: 80%;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  padding-right: 2rem;
+  background-color: white;
+  overflow: hidden;
+  position: relative;
 `;
 
 const Label = styled.label`
   font-size: 1.2rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
   color: #333;
+  display: block;
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -0.1rem;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #ccc;
+  }
 `;
 
 const Input = styled.input`
   padding: 0.5rem;
   font-size: 1.2rem;
-  border-radius: 0.25rem;
-  border: 1px solid #ccc;
+  border: none;
   width: 100%;
   margin-bottom: 1rem;
+  background-color: transparent;
+
+  &:focus {
+    outline: none;
+  }
 `;
 
 const FormContainer = styled.div`
@@ -271,7 +342,7 @@ const FormContainer = styled.div`
   width: 100%;
   background-color: #f7f7f7;
   padding: 2rem;
-  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
   z-index: 10;
   display: flex;
   flex-direction: column;
@@ -280,6 +351,7 @@ const FormContainer = styled.div`
 const FormWrapper = styled.div`
   flex-grow: 1;
   overflow-y: auto;
+  background-color: #f7f7f7;
 `;
 
 export default AgentsList

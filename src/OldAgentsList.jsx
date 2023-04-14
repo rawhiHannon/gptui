@@ -87,7 +87,12 @@ const AgentsList = ({ agents }) => {
               />
             </FormGroup>
             {/* repeat for all other Agent fields */}
-            <Button type="submit">Save Changes</Button>
+
+            <div className="form-buttons">
+              <button onClick={handleSaveChanges}>Save Changes</button>
+              <button onClick={toggleVisibility} style={{ marginLeft: '10px' }}>Cancel</button>
+            </div>
+
           </Form>
         </FormContainer>
       )}
