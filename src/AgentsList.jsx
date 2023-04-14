@@ -59,7 +59,7 @@ const AgentsList = ({ agents }) => {
       [propertyName]: !prevState[propertyName],
     }));
   };
-  
+
   const renderColorPickerFormGroup = (labelText, fieldName) => {
     return (
       <FormGroup key={fieldName}>
@@ -87,14 +87,15 @@ const AgentsList = ({ agents }) => {
   };
 
   const renderTextInputFormGroup = (label, propertyName) => (
-    <FormGroup isCollapsed={formGroupCollapseStatus[propertyName]}>
+    <FormGroup>
       <Label htmlFor={propertyName}>
         {label}
         <CollapseButton onClick={() => toggleCollapse(propertyName)}>
-          {formGroupCollapseStatus[propertyName] ? "-" : "+"}
+          {formGroupCollapseStatus[propertyName] ? "+" : "-"}
         </CollapseButton>
       </Label>
       <Input
+        isCollapsed={formGroupCollapseStatus[propertyName]}
         type="text"
         id={propertyName}
         name={propertyName}
@@ -106,14 +107,15 @@ const AgentsList = ({ agents }) => {
   );
   
   const renderTextAreaFormGroup = (label, propertyName) => (
-    <FormGroup isCollapsed={formGroupCollapseStatus[propertyName]}>
+    <FormGroup>
       <Label htmlFor={propertyName}>
         {label}
         <CollapseButton onClick={() => toggleCollapse(propertyName)}>
-          {formGroupCollapseStatus[propertyName] ? "-" : "+"}
+          {formGroupCollapseStatus[propertyName] ? "+" : "-"}
         </CollapseButton>
       </Label>
       <TextArea
+        isCollapsed={formGroupCollapseStatus[propertyName]}
         id={propertyName}
         name={propertyName}
         value={selectedAgent[propertyName]}
@@ -231,6 +233,7 @@ const Container = styled.div`
 `;
 
 const TextArea = styled.textarea`
+  display: ${({ isCollapsed }) => (isCollapsed ? "none" : "flex")};
   padding: 0.75rem;
   font-size: 1.2rem;
   border: none;
@@ -327,7 +330,6 @@ const FormHeading = styled.h2`
 `;
 
 const FormGroup = styled.div`
-  display: ${({ isCollapsed }) => (isCollapsed ? "none" : "flex")};
   flex-direction: column;
   margin-bottom: 1rem;
   width: 80%;
@@ -361,6 +363,7 @@ const Label = styled.label`
 `;
 
 const Input = styled.input`
+  display: ${({ isCollapsed }) => (isCollapsed ? "none" : "flex")}; 
   padding: 0.5rem;
   font-size: 1.2rem;
   border: none;
