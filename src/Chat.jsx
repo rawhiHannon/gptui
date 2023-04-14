@@ -28,7 +28,7 @@ const Chat = () => {
     if(message == "") {
       return
     }
-    let msg = { 
+    let msg = {
       id: messages.length + 1, 
       text: message, 
       user: { name: "GPT", avatar: "gpt", color: "maroon" } 

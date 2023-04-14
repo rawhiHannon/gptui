@@ -1,12 +1,13 @@
 function WebSocketsManager() {
     this.ws = null;
-    this.serverUrl = "ws://localhost:7878/api/ws";
+    this.serverUrl = "ws://3.89.0.168:7878/api/ws";
     this.roomInput = null;
     this.rooms = [];
     this.manager = null;
     this.user = {
       name: "rawhi"
     };
+    this.token = "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijk3OWVkMTU1OTdhYjM1Zjc4MjljZTc0NDMwN2I3OTNiN2ViZWIyZjAiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vYmlibGVwaWNzLTU2ZmM1IiwiYXVkIjoiYmlibGVwaWNzLTU2ZmM1IiwiYXV0aF90aW1lIjoxNjc5NjEwOTM1LCJ1c2VyX2lkIjoiVWdjdDJyZXVkMVRDZUdYRlV3MG0zcndnQVdBMiIsInN1YiI6IlVnY3QycmV1ZDFUQ2VHWEZVdzBtM3J3Z0FXQTIiLCJpYXQiOjE2Nzk2MTA5MzUsImV4cCI6MTY3OTYxNDUzNSwiZW1haWwiOiJycmF3aGlAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbInJyYXdoaUBnbWFpbC5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.AezYbeCG4El1OExH8edWLrn1L2an8rx-zec9Ai1ANpCCThbuHjn4qUUSIGwMZ_Oz8enXlwIJeO995vUzBO5DhLWaOQMutsS2CE0fu62WvnVa9sgi8m5M85utsJEBBs03AgpGb-BGoXgL06FoNYbn4rDv1J6OFrxz63OfL5joX9rkzXD9kxHKwrC_xmErjqLI_-UFNyo7Z267nnIgj94KvNm9hzs7ijHjzWyB7vQ3rPHbAQj-jv0Kcs1cu3c9FGh5K_C3Rl-rH4yKDVro7jRqSsSDiqTl1rxgArBeCSkqS1241GeTgnerbY8i8BE09styP_ydbMeOflArMnkaduit2w"
     this.users = [];
     this.ready = this.connectToWebsocket()
 }
@@ -19,7 +20,7 @@ self.setManager = function(manager) {
 //TODO: handle reject
 self.connectToWebsocket = function() {
   return new Promise((resolve, reject) => {
-    this.ws = new WebSocket(this.serverUrl + "?name=" + this.user.name);
+    this.ws = new WebSocket(this.serverUrl + "?bearer=" + this.token);
     this.ws.addEventListener('open', (event) => { this.onWebsocketOpen(event, resolve) });
     this.ws.addEventListener('message', (event) => { this.handleNewMessage(event) });
     this.ws.addEventListener('close', (event) => { this.handleClose(event) });
@@ -27,7 +28,7 @@ self.connectToWebsocket = function() {
 }
 
 self.handleClose = function(event) {
-    alert("Server closed the connection, please refresh the page")
+    // alert("Server closed the connection, please refresh the page")
 }
 
 self.onWebsocketOpen = function(event, resolve) {
@@ -92,7 +93,7 @@ self.sendChatMessage = async function(msg) {
   await this.ready;
     this.ws.send(JSON.stringify({
       action: 'chat',
-      message: msg,
+      message: msg
     }));
 }
 
@@ -100,7 +101,7 @@ self.sendSettingsMessage = async function(data) {
   await this.ready;
   this.ws.send(JSON.stringify({
     action: 'settings',
-    data: data,
+    data: {figure_id: 1}
   }));
 }
 
