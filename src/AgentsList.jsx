@@ -11,6 +11,14 @@ const AgentsList = ({ agents }) => {
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [isColorPickerOpen, setIsColorPickerOpen] = useState({});
   const [currentView, setCurrentView] = useState('chat');
+  const [formGroupCollapseStatus, setFormGroupCollapseStatus] = useState(
+    agents.reduce((acc, agent) => {
+      Object.keys(agent).forEach((key) => {
+        acc[key] = false;
+      });
+      return acc;
+    }, {})
+  );
 
   const handleColorPickerToggle = (fieldName) => {
     setIsColorPickerOpen({ ...isColorPickerOpen, [fieldName]: !isColorPickerOpen[fieldName] });
@@ -45,6 +53,13 @@ const AgentsList = ({ agents }) => {
     }
   };
 
+  const toggleCollapse = (propertyName) => {
+    setFormGroupCollapseStatus((prevState) => ({
+      ...prevState,
+      [propertyName]: !prevState[propertyName],
+    }));
+  };
+  
   const renderColorPickerFormGroup = (labelText, fieldName) => {
     return (
       <FormGroup key={fieldName}>
@@ -72,23 +87,32 @@ const AgentsList = ({ agents }) => {
   };
 
   const renderTextInputFormGroup = (label, propertyName) => (
-    <FormGroup>
-      <Label htmlFor={propertyName}>{label}</Label>
+    <FormGroup isCollapsed={formGroupCollapseStatus[propertyName]}>
+      <Label htmlFor={propertyName}>
+        {label}
+        <CollapseButton onClick={() => toggleCollapse(propertyName)}>
+          {formGroupCollapseStatus[propertyName] ? "-" : "+"}
+        </CollapseButton>
+      </Label>
       <Input
         type="text"
         id={propertyName}
         name={propertyName}
         onKeyDown={handleKeyDown}
         value={selectedAgent[propertyName]}
-        onChange={(e) => handleTextChange(e.target.value, propertyName)
-        }
+        onChange={(e) => handleTextChange(e.target.value, propertyName)}
       />
     </FormGroup>
   );
   
   const renderTextAreaFormGroup = (label, propertyName) => (
-    <FormGroup>
-      <Label htmlFor={propertyName}>{label}</Label>
+    <FormGroup isCollapsed={formGroupCollapseStatus[propertyName]}>
+      <Label htmlFor={propertyName}>
+        {label}
+        <CollapseButton onClick={() => toggleCollapse(propertyName)}>
+          {formGroupCollapseStatus[propertyName] ? "-" : "+"}
+        </CollapseButton>
+      </Label>
       <TextArea
         id={propertyName}
         name={propertyName}
@@ -183,6 +207,19 @@ const AgentsList = ({ agents }) => {
     </Container>
   );
 };
+
+const CollapseButton = styled.button`
+  background-color: transparent;
+  color: #333;
+  padding: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
+
+  &:hover {
+    color: #6c63ff;
+  }
+`;
 
 const Container = styled.div`
   display: flex;
@@ -290,7 +327,7 @@ const FormHeading = styled.h2`
 `;
 
 const FormGroup = styled.div`
-  display: flex;
+  display: ${({ isCollapsed }) => (isCollapsed ? "none" : "flex")};
   flex-direction: column;
   margin-bottom: 1rem;
   width: 80%;
@@ -307,7 +344,9 @@ const Label = styled.label`
   font-size: 1.2rem;
   margin-bottom: 1rem;
   color: #333;
-  display: block;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   position: relative;
 
   &::after {
