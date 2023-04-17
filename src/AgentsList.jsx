@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
 import ColorPicker from './ColorPicker';
@@ -10,7 +10,6 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 const AgentsList = ({ agents }) => {
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [isColorPickerOpen, setIsColorPickerOpen] = useState({});
-  const [currentView, setCurrentView] = useState('chat');
   const [formGroupCollapseStatus, setFormGroupCollapseStatus] = useState(
     agents.reduce((acc, agent) => {
       Object.keys(agent).forEach((key) => {
@@ -19,7 +18,28 @@ const AgentsList = ({ agents }) => {
       return acc;
     }, {})
   );
+  
+  const [previewPositions, setPreviewPositions] = useState(() => {
+    const savedPositions = localStorage.getItem('previewPositions');
+    return savedPositions ? JSON.parse(savedPositions) : {};
+  });
 
+  const [viewsVisibility, setViewsVisibility] = useState(() => {
+    const savedviewsVisibility = localStorage.getItem('viewsVisibility');
+    return savedviewsVisibility ? JSON.parse(savedviewsVisibility) : {};
+  });
+
+  const toggleViewVisibility = (view) => {
+    setViewsVisibility((prevState) => {
+      const updatedState = {
+        ...prevState,
+        [view]: prevState[view] ? !prevState[view] : true,
+      };
+      localStorage.setItem('viewsVisibility', JSON.stringify(updatedState));
+      return updatedState;
+    });
+  };
+  
   const handleColorPickerToggle = (fieldName) => {
     setIsColorPickerOpen({ ...isColorPickerOpen, [fieldName]: !isColorPickerOpen[fieldName] });
   };
@@ -58,6 +78,17 @@ const AgentsList = ({ agents }) => {
       ...prevState,
       [propertyName]: !prevState[propertyName],
     }));
+  };
+
+  const setPreviewPosition = (previewName, position) => {
+    setPreviewPositions((prevState) => {
+      const updatedPositions = {
+        ...prevState,
+        [previewName]: position,
+      };
+      localStorage.setItem('previewPositions', JSON.stringify(updatedPositions));
+      return updatedPositions;
+    });
   };
 
   const renderColorPickerFormGroup = (labelText, fieldName) => {
@@ -126,10 +157,6 @@ const AgentsList = ({ agents }) => {
     </FormGroup>
   );
 
-  const handleMove = (dragId, hoverId) => {
-    // Perform the reordering logic here
-  };
-
   return (
     <Container>
       <Table>
@@ -195,13 +222,37 @@ const AgentsList = ({ agents }) => {
           </Form>
           
           <div className="app">
-          <nav className="navigation">
-            <button onClick={() => setCurrentView('chat')}>Chat</button>
-            <button onClick={() => setCurrentView('other')}>Other</button>
-          </nav>
-            {currentView === 'chat' && <ChatPreview agent={selectedAgent} />}
-            {currentView === 'other' && <OtherView />}
-          </div>
+              <nav className="navigation">
+                <button onClick={() => toggleViewVisibility('chat')}>
+                  {viewsVisibility['chat'] ? 'Hide Chat' : 'Show Chat'}
+                </button>
+                <button onClick={() => toggleViewVisibility('other')}>
+                  {viewsVisibility['other'] ? 'Hide Other' : 'Show Other'}
+                </button>
+              </nav>
+              {viewsVisibility['chat'] && (
+                <PreviewContainer>
+                  <ChatPreview
+                    position={previewPositions['chat']}
+                    agent={selectedAgent}
+                    onStop={(e, data) => {
+                      setPreviewPosition('chat', { x: data.x, y: data.y });
+                    }}
+                  />
+                </PreviewContainer>
+              )}
+              {viewsVisibility['other'] && (
+                <PreviewContainer>
+                  <OtherView
+                    position={previewPositions['other']}
+                    agent={selectedAgent}
+                    onStop={(e, data) => {
+                      setPreviewPosition('other', { x: data.x, y: data.y });
+                    }}
+                  />
+                </PreviewContainer>
+              )}
+            </div>
           
           </FormWrapper>
         </FormContainer>
@@ -209,6 +260,10 @@ const AgentsList = ({ agents }) => {
     </Container>
   );
 };
+
+const PreviewContainer = styled.div`
+  padding: 1rem;
+`;
 
 const CollapseButton = styled.button`
   background-color: transparent;
@@ -221,6 +276,11 @@ const CollapseButton = styled.button`
   &:hover {
     color: #6c63ff;
   }
+
+  &:focus {
+    outline: none;
+  }
+
 `;
 
 const Container = styled.div`

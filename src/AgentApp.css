@@ -238,7 +238,7 @@ body,
 
 .send-icon {
   position: absolute;
-  right: 4px;
+  right: 0.3rem;
   background: #0077ff;
   border: none;
   font-size: 20px;
@@ -248,8 +248,8 @@ body,
   top: 50%;
   transform: translateY(-50%);
   border-radius: 50%;
-  width: 35px;
-  height: 35px;
+  width: 32px;
+  height: 32px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -267,6 +267,7 @@ body,
   width: auto;
   max-width: 50%;
   word-wrap: break-word;
+  border-radius: 12px;
 }
 
 .chat-preview-message-response {
@@ -274,6 +275,7 @@ body,
   width: auto;
   max-width: 50%;
   word-wrap: break-word;
+  border-radius: 12px;
 }
 
 .navigation {

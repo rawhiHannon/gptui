@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FiSend } from 'react-icons/fi';
 import Draggable from 'react-draggable';
 
-const ChatPreview = ({ agent }) => {
+const ChatPreview = ({ agent, position, onStop }) => {
   const [messages, setMessages] = useState([
     {
       type: 'response',
@@ -44,7 +44,7 @@ const ChatPreview = ({ agent }) => {
   };
 
   return (
-    <Draggable handle=".chat-preview-drag-handle">
+    <Draggable bounds="body" position={position} onStop={onStop} handle=".chat-preview-drag-handle">
     <div className="chat-preview" style={{ backgroundColor: agent.ChatBackgroundColor }}>
       <div className="chat-preview-header chat-preview-drag-handle">
         Agent Buddy
