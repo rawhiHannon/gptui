@@ -3,7 +3,7 @@ import axios from 'axios';
 import styled from 'styled-components';
 import ColorPicker from './ColorPicker';
 import ChatPreview from './ChatPreview';
-import OtherView from './OtherView';
+import SignupPreview from './SignupPreview';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
@@ -226,8 +226,8 @@ const AgentsList = ({ agents }) => {
                 <button onClick={() => toggleViewVisibility('chat')}>
                   {viewsVisibility['chat'] ? 'Hide Chat' : 'Show Chat'}
                 </button>
-                <button onClick={() => toggleViewVisibility('other')}>
-                  {viewsVisibility['other'] ? 'Hide Other' : 'Show Other'}
+                <button onClick={() => toggleViewVisibility('signup')}>
+                  {viewsVisibility['signup'] ? 'Hide signup' : 'Show signup'}
                 </button>
               </nav>
               {viewsVisibility['chat'] && (
@@ -241,13 +241,13 @@ const AgentsList = ({ agents }) => {
                   />
                 </PreviewContainer>
               )}
-              {viewsVisibility['other'] && (
+              {viewsVisibility['signup'] && (
                 <PreviewContainer>
-                  <OtherView
-                    position={previewPositions['other']}
+                  <SignupPreview
+                    position={previewPositions['signup']}
                     agent={selectedAgent}
                     onStop={(e, data) => {
-                      setPreviewPosition('other', { x: data.x, y: data.y });
+                      setPreviewPosition('signup', { x: data.x, y: data.y });
                     }}
                   />
                 </PreviewContainer>
