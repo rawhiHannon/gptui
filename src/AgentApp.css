@@ -282,7 +282,7 @@ body,
 .navigation {
   position: fixed;
   bottom: 20px; /* Add this line */
-  right: 20px;
+  left: 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -325,4 +325,37 @@ body,
 
 .chat-input button:hover {
   background-color: #333;
+}
+
+.chatbox-sign {
+  margin-top: -25px;
+  margin-bottom: -18px;
+}
+
+.chatbox-input {
+  background: #eee3cb;
+  padding: 0px 10px;
+  display: flex;
+  align-items: center;
+  border-radius: 5px;
+}
+
+.chatbox-input input {
+  width: 100%;
+  outline: none;
+  height: 36px;
+  border: none;
+  background: transparent;
+  margin-left: 5px;
+}
+
+.chatbox-submit {
+  background:#865439;
+  display: block;
+  margin: 10px 0px;
+  text-align: center;
+  color: #fff;
+  text-decoration: none;
+  padding: 10px 0px;
+  border-radius: 10px;
 }

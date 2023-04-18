@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import ColorPicker from './ColorPicker';
 import ChatPreview from './ChatPreview';
 import SignupPreview from './SignupPreview';
+import SignupSMSPreview from './SignupSMSPreview';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
@@ -187,12 +188,13 @@ const AgentsList = ({ agents }) => {
           <FormWrapper>
           <Form onSubmit={handleFormSubmit}>
             
-            <CloseIcon onClick={() => setSelectedAgent(null)}>
-            <button className="navigation-close">
-              <FontAwesomeIcon icon={faTimes} />
-            </button>
-            </CloseIcon>
-            <FormHeading>Edit Agent</FormHeading>
+            <FormHeader>
+              <FormHeading>Edit Agent</FormHeading>
+              <CloseIcon onClick={() => setSelectedAgent(null)}>
+                  <FontAwesomeIcon icon={faTimes} />
+              </CloseIcon>
+            </FormHeader>
+
             {renderTextInputFormGroup('Logo', 'Logo')}
             {renderTextInputFormGroup('Chat Icon', 'ChatIcon')}
             {renderTextInputFormGroup('Input Place holder', 'InputPlaceholder')}
@@ -204,6 +206,10 @@ const AgentsList = ({ agents }) => {
             {renderTextAreaFormGroup('Welcome Second Text', 'WelcomeSecondText')}
             {renderTextAreaFormGroup('Welcome Third Text', 'WelcomeThirdText')}
             {renderTextAreaFormGroup('Text Login Page On Close', 'TextLoginPageOnClose')}
+            {renderTextAreaFormGroup('Email First Text', 'EmailFirstText')}
+            {renderTextAreaFormGroup('Phone First Text', 'PhoneFirstText')}
+            {renderTextAreaFormGroup('Phone Second Text', 'PhoneSecondText')}
+            {renderTextAreaFormGroup('Privacy Policy Text', 'PrivacyPolicyText')}
 
             {renderColorPickerFormGroup('Filling Box Background Color', 'FillingBoxBackgroundColor')}
             {renderColorPickerFormGroup('Filling Text Color', 'FillingTextColor')}
@@ -229,6 +235,9 @@ const AgentsList = ({ agents }) => {
                 <button onClick={() => toggleViewVisibility('signup')}>
                   {viewsVisibility['signup'] ? 'Hide signup' : 'Show signup'}
                 </button>
+                <button onClick={() => toggleViewVisibility('sms')}>
+                  {viewsVisibility['sms'] ? 'Hide sms' : 'Show sms'}
+                </button>
               </nav>
               {viewsVisibility['chat'] && (
                 <PreviewContainer>
@@ -252,6 +261,17 @@ const AgentsList = ({ agents }) => {
                   />
                 </PreviewContainer>
               )}
+              {viewsVisibility['sms'] && (
+                <PreviewContainer>
+                  <SignupSMSPreview
+                    position={previewPositions['sms']}
+                    agent={selectedAgent}
+                    onStop={(e, data) => {
+                      setPreviewPosition('sms', { x: data.x, y: data.y });
+                    }}
+                  />
+                </PreviewContainer>
+              )}
             </div>
           
           </FormWrapper>
@@ -260,6 +280,14 @@ const AgentsList = ({ agents }) => {
     </Container>
   );
 };
+
+const FormHeader = styled.div`
+  flex-direction: column;
+  width: 80%;
+  padding-right: 2rem;
+  overflow: hidden;
+  position: relative;
+`;
 
 const PreviewContainer = styled.div`
   padding: 1rem;
@@ -366,10 +394,16 @@ const Button = styled.button`
   }
 `;
 
+const FormHeading = styled.h3`
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+`;
+
 const CloseIcon = styled.span`
   position: absolute;
-  top: 1rem;
-  left: 1rem;
+  top: 15px;
+  right: 0;
   font-size: 2rem;
   cursor: pointer;
   color: #333;
@@ -383,11 +417,6 @@ const CloseIcon = styled.span`
 const Form = styled.form`
 `;
 
-const FormHeading = styled.h2`
-  font-size: 2rem;
-  margin-bottom: 2rem;
-  color: #333;
-`;
 
 const FormGroup = styled.div`
   flex-direction: column;

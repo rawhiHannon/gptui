@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Draggable from 'react-draggable';
 
-const SignupPreview = ({ agent, position, onStop, onClose }) => {
+const SignupSMSPreview = ({ agent, position, onStop, onClose }) => {
     const [email, setEmail] = useState('');
 
     const handleEmailChange = (e) => {
@@ -57,10 +57,10 @@ const SignupPreview = ({ agent, position, onStop, onClose }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="js-chatbox-forminput">
-          <div style={{ }}>
-            <p style={{fontSize: '13px'}}>{agent.PrivacyPolicyText}</p>
-          </div>
-          <button type="submit" style={{ width: '100%', border: 'none', outline: 'none' }} className="chatbox-submit">Continue</button>
+        <div style={{ }}>
+          <p style={{fontSize: '13px'}}>By continuing you agree to our Terms of Service and Privacy Policy</p>
+        </div>
+        <button type="submit" style={{ width: '100%', border: 'none', outline: 'none' }} className="chatbox-submit">Continue</button>
         </form>
       </div>
     </div>
@@ -69,5 +69,5 @@ const SignupPreview = ({ agent, position, onStop, onClose }) => {
 };
 
 
-export default SignupPreview;
+export default SignupSMSPreview;
 
