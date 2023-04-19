@@ -25,7 +25,7 @@ const SignupPreview = ({ agent, position, onStop, onClose }) => {
 
   return (
     <Draggable bounds="body" position={position} onStop={onStop} handle=".chat-preview-drag-handle">
-    <div className="chat-preview" style={{ backgroundColor: agent.ChatBackgroundColor }}>
+    <div className="chat-preview" style={{ backgroundColor: agent.chat_background_color }}>
       <div className="chat-preview-header chat-preview-drag-handle">
         <div className="chatbox-flex-center" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -40,13 +40,13 @@ const SignupPreview = ({ agent, position, onStop, onClose }) => {
       </div>
       <div className="chatbox-sign" id="chatbox-sign" style={{ display: 'block' }}>
       <div id="js-chatbox-email-input">
-        <h3 style={{textAlign: 'center', color: '#333333'}}>{agent.EmailFirstText}</h3>
+        <h3 style={{textAlign: 'center', color: '#333333'}}>{agent.email_first_text}</h3>
         
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <img src="https://agentbuddy.xseed.me/logo.png" style={{ width: '250px' }} alt="" className="chatbox-image" id="chatbox-logo" />
         </div>
 
-        <p id="js-chatbox-welcomeFirstText">{agent.WelcomeFirstText}</p>
+        <p id="js-chatbox-welcomeFirstText">{agent.welcome_first_text}</p>
         <div className="chatbox-input">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-mail">
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
@@ -58,9 +58,17 @@ const SignupPreview = ({ agent, position, onStop, onClose }) => {
 
         <form onSubmit={handleSubmit} className="js-chatbox-forminput">
           <div style={{ }}>
-            <p style={{fontSize: '13px'}}>{agent.PrivacyPolicyText}</p>
+            <p style={{fontSize: '13px'}}>{agent.privacy_policy_text}</p>
           </div>
-          <button type="submit" style={{ width: '100%', border: 'none', outline: 'none' }} className="chatbox-submit">Continue</button>
+          <button type="submit"
+           style={{ 
+            width: '100%', 
+            border: 'none', 
+            outline: 'none',
+            backgroundColor: agent.button_background_color,
+            color: agent.button_text_color,
+          }} 
+           className="chatbox-submit">Continue</button>
         </form>
       </div>
     </div>

@@ -58,11 +58,22 @@ const AgentsList = ({ agents }) => {
     setSelectedAgent(agent);
   };
 
+  const updateAgent = (agent) => {
+    for(let i in agents) {
+      if(agents[i].host == agent.host) {
+        agents[i] = agent;
+        return;
+      }
+    }
+  }
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(`/api/agents/${selectedAgent.Host}`, selectedAgent);
+      const response = await axios.put(`https://chat.agentaichat.com:2096/api/agent?host=${selectedAgent.host}`, selectedAgent);
       console.log(response.data);
+      updateAgent(selectedAgent.host)
+      setSelectedAgent(null);
     } catch (error) {
       console.log(error);
     }
@@ -171,10 +182,10 @@ const AgentsList = ({ agents }) => {
         </thead>
         <tbody>
           {agents.map((agent) => (
-            <tr key={agent.Host}>
-              <td>{agent.Host}</td>
-              <td>{agent.Logo}</td>
-              <td>{agent.ChatIcon}</td>
+            <tr key={agent.host}>
+              <td>{agent.host}</td>
+              <td>{agent.logo}</td>
+              <td>{agent.chat_icon}</td>
               <td>
                 <Button onClick={() => handleAgentClick(agent)}>Edit</Button>
               </td>
@@ -195,31 +206,31 @@ const AgentsList = ({ agents }) => {
               </CloseIcon>
             </FormHeader>
 
-            {renderTextInputFormGroup('Logo', 'Logo')}
-            {renderTextInputFormGroup('Chat Icon', 'ChatIcon')}
-            {renderTextInputFormGroup('Input Place holder', 'InputPlaceholder')}
+            {renderTextInputFormGroup('Logo', 'logo')}
+            {renderTextInputFormGroup('Chat Icon', 'chat_icon')}
+            {renderTextInputFormGroup('Input Place holder', 'input_placeholder')}
 
-            {renderTextInputFormGroup('Welcoming Message', 'WelcomingMessage')}
-            {renderTextInputFormGroup('Text Login Page On Close', 'TextLoginPageOnClose')}
+            {renderTextInputFormGroup('Welcoming Message', 'welcoming_message')}
+            {renderTextInputFormGroup('Text Login Page On Close', 'text_login_page_on_close')}
 
-            {renderTextAreaFormGroup('Welcome First Text', 'WelcomeFirstText')}
-            {renderTextAreaFormGroup('Welcome Second Text', 'WelcomeSecondText')}
-            {renderTextAreaFormGroup('Welcome Third Text', 'WelcomeThirdText')}
-            {renderTextAreaFormGroup('Text Login Page On Close', 'TextLoginPageOnClose')}
-            {renderTextAreaFormGroup('Email First Text', 'EmailFirstText')}
-            {renderTextAreaFormGroup('Phone First Text', 'PhoneFirstText')}
-            {renderTextAreaFormGroup('Phone Second Text', 'PhoneSecondText')}
-            {renderTextAreaFormGroup('Privacy Policy Text', 'PrivacyPolicyText')}
+            {renderTextAreaFormGroup('Welcome First Text', 'welcome_first_text')}
+            {renderTextAreaFormGroup('Welcome Second Text', 'welcome_second_text')}
+            {renderTextAreaFormGroup('Welcome Third Text', 'welcome_third_text')}
+            {renderTextAreaFormGroup('Text Login Page On Close', 'text_login_page_on_close')}
+            {renderTextAreaFormGroup('Email First Text', 'email_first_text')}
+            {renderTextAreaFormGroup('Phone First Text', 'phone_first_text')}
+            {renderTextAreaFormGroup('Phone Second Text', 'phone_second_text')}
+            {renderTextAreaFormGroup('Privacy Policy Text', 'privacy_policy_text')}
 
-            {renderColorPickerFormGroup('Filling Box Background Color', 'FillingBoxBackgroundColor')}
-            {renderColorPickerFormGroup('Filling Text Color', 'FillingTextColor')}
-            {renderColorPickerFormGroup('Chat Background Color', 'ChatBackgroundColor')}
-            {renderColorPickerFormGroup('Chat Background Send Color', 'ChatBackgroundSendColor')}
-            {renderColorPickerFormGroup('Chat Background Response Color', 'ChatBackgroundResponseColor')}
-            {renderColorPickerFormGroup('Chat Text Send Color', 'ChatTextSendColor')}
-            {renderColorPickerFormGroup('Chat Text Response Color', 'ChatTextResponseColor')}
-            {renderColorPickerFormGroup('Button Background Color', 'ButtonBackgroundColor')}
-            {renderColorPickerFormGroup('Button Text Color', 'ButtonTextColor')}
+            {renderColorPickerFormGroup('Filling Box Background Color', 'filling_box_background_color')}
+            {renderColorPickerFormGroup('Filling Text Color', 'filling_text_color')}
+            {renderColorPickerFormGroup('Chat Background Color', 'chat_background_color')}
+            {renderColorPickerFormGroup('Chat Background Send Color', 'chat_background_send_color')}
+            {renderColorPickerFormGroup('Chat Background Response Color', 'chat_background_response_color')}
+            {renderColorPickerFormGroup('Chat Text Send Color', 'chat_text_send_color')}
+            {renderColorPickerFormGroup('Chat Text Response Color', 'chat_text_response_color')}
+            {renderColorPickerFormGroup('Button Background Color', 'button_background_color')}
+            {renderColorPickerFormGroup('Button Text Color', 'button_text_color')}
             {/* repeat for all other Agent fields */}
             <div className="form-buttons">
               <Button className="save-button" type="submit">Save Changes</Button>
@@ -308,7 +319,6 @@ const CollapseButton = styled.button`
   &:focus {
     outline: none;
   }
-
 `;
 
 const Container = styled.div`

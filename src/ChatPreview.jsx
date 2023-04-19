@@ -6,7 +6,7 @@ const ChatPreview = ({ agent, position, onStop }) => {
   const [messages, setMessages] = useState([
     {
       type: 'response',
-      text: agent.WelcomingMessage,
+      text: agent.welcoming_message,
     },
     {
         type: 'send',
@@ -18,11 +18,11 @@ const ChatPreview = ({ agent, position, onStop }) => {
     setMessages((prevMessages) => [
       {
         type: 'response',
-        text: agent.WelcomingMessage,
+        text: agent.welcoming_message,
       },
       prevMessages[1],
     ]);
-  }, [agent.WelcomingMessage]);
+  }, [agent.welcoming_message]);
 
   const [inputValue, setInputValue] = useState('');
 
@@ -51,7 +51,7 @@ const ChatPreview = ({ agent, position, onStop }) => {
 
   return (
     <Draggable bounds="body" position={position} onStop={onStop} handle=".chat-preview-drag-handle">
-    <div className="chat-preview" style={{ backgroundColor: agent.ChatBackgroundColor }}>
+    <div className="chat-preview" style={{ backgroundColor: agent.chat_background_color }}>
       <div className="chat-preview-header chat-preview-drag-handle">
         <div className="chatbox-flex-center" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <img src="https://agentbuddy.xseed.me/chatbox-logo.png" style={{width: '140px', height: '30px'}} />
@@ -68,8 +68,8 @@ const ChatPreview = ({ agent, position, onStop }) => {
             style={{
                 backgroundColor:
                   message.type === 'send'
-                    ? agent.ChatBackgroundSendColor
-                    : agent.ChatBackgroundResponseColor,
+                    ? agent.chat_background_send_color
+                    : agent.chat_background_response_color,
                 color:
                   message.type === 'send'
                     ? agent.ChatTextSendColor
@@ -86,15 +86,15 @@ const ChatPreview = ({ agent, position, onStop }) => {
             type="text"
             value={inputValue}
             onChange={handleInputChange}
-            placeholder={agent.InputPlaceholder}
+            placeholder={agent.input_place_holder}
             onKeyDown={handleEnter}
-            style={{ backgroundColor: agent.FillingBoxBackgroundColor, color: agent.FillingTextColor }}
+            style={{ backgroundColor: agent.filling_box_background_color, color: agent.filling_text_color }}
           />
           <button
            className="send-icon" 
            style={{
-            backgroundColor: agent.ButtonBackgroundColor,
-            color: agent.ButtonTextColor,
+            backgroundColor: agent.button_background_color,
+            color: agent.button_text_color,
           }}
            onClick={handleSendMessage}>
             <FiSend />
