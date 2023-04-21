@@ -4,6 +4,7 @@ import AgentsList from './AgentsList';
 // import EditAgent from './EditAgent';
 import reactLogo from './assets/react.svg';
 import './AgentApp.css';
+import GoogleLoginButton from './GoogleLoginButton';
 
 const AgentsApp = () => {
   const [agents, setAgents] = useState([]);
@@ -31,23 +32,9 @@ const AgentsApp = () => {
     setActiveTab('edit');
   };
 
-  const handleSave = async (updatedAgent) => {
-    try {
-      const response = await axios.put(`https://chat.agentaichat.com:2096/api/agent/${updatedAgent.id}`, updatedAgent);
-      const updatedAgents = agents.map((agent) => (agent.id === updatedAgent.id ? updatedAgent : agent));
-      setAgents(updatedAgents);
-      setSelectedAgent(null);
-      setIsEditing(false);
-      setActiveTab('list');
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleCancel = () => {
-    setSelectedAgent(null);
-    setIsEditing(false);
-    setActiveTab('list');
+  const handleGoogleLoginSuccess = () => {
+    // Do something after the user has successfully logged in
+    console.log('User logged in successfully');
   };
 
   return (
@@ -69,6 +56,12 @@ const AgentsApp = () => {
         <div className={`crm__tab ${activeTab === 'list' ? 'crm__tab--active' : ''}`} onClick={() => handleTabClick('list')}>
           <i className="fas fa-users crm__tab-icon"></i>
           <span className="crm__tab-label">Agents</span>
+        </div>
+        <div className={`crm__tab `}>
+          <i className="fas fa-users crm__tab-icon"></i>
+          <span className="crm__tab-label">
+            <GoogleLoginButton onLoginSuccess={handleGoogleLoginSuccess} />
+          </span>
         </div>
       </div>
     </div>
