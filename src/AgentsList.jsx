@@ -7,8 +7,19 @@ import SignupPreview from './SignupPreview';
 import SignupSMSPreview from './SignupSMSPreview';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import TextField from '@mui/material/TextField';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Button from '@mui/material/Button';
 
-const AgentsList = ({ agents }) => {
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
+const AgentsList = ({ agents, onAddAgent }) => {
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [isColorPickerOpen, setIsColorPickerOpen] = useState({});
   const [formGroupCollapseStatus, setFormGroupCollapseStatus] = useState(
@@ -29,6 +40,24 @@ const AgentsList = ({ agents }) => {
     const savedviewsVisibility = localStorage.getItem('viewsVisibility');
     return savedviewsVisibility ? JSON.parse(savedviewsVisibility) : {};
   });
+
+  const showErrorNotification = (msg) => {
+    toast.error(
+      msg, {
+      position: toast.POSITION.TOP_CENTER,
+      autoClose: 2000,
+      hideProgressBar: true,
+    });
+  };
+
+  const showSuccessNotification = (msg) => {
+    toast.success(
+      msg, {
+      position: toast.POSITION.TOP_CENTER,
+      autoClose: 2000,
+      hideProgressBar: true,
+    });
+  };
 
   const toggleViewVisibility = (view) => {
     setViewsVisibility((prevState) => {
@@ -71,9 +100,9 @@ const AgentsList = ({ agents }) => {
     e.preventDefault();
     try {
       const response = await axios.put(`https://chat.agentaichat.com:2096/api/agent?host=${selectedAgent.host}`, selectedAgent);
-      console.log(response.data);
       updateAgent(selectedAgent.host)
       setSelectedAgent(null);
+      showSuccessNotification("Updated successfully")
     } catch (error) {
       console.log(error);
     }
@@ -101,6 +130,37 @@ const AgentsList = ({ agents }) => {
       localStorage.setItem('previewPositions', JSON.stringify(updatedPositions));
       return updatedPositions;
     });
+  };
+
+  const [isAddingAgent, setIsAddingAgent] = useState(false);
+  const [newAgentName, setNewAgentName] = useState("");
+
+  const handleAddAgent = () => {
+    setIsAddingAgent(true);
+  };
+
+  const handleNewAgentNameChange = (event) => {
+    setNewAgentName(event.target.value);
+  };
+
+  const handleAddNewAgent = () => {
+    const newAgent = {
+      name: newAgentName,
+    };
+    for(let i in agents) {
+      if(agents[i].host == newAgentName) {
+        setIsAddingAgent(false);
+        showErrorNotification("Agent already exists!")
+        return;
+      }
+    }
+    onAddAgent(newAgent);
+    setIsAddingAgent(false);
+  };
+
+  const handleCancelAddAgent = () => {
+    setIsAddingAgent(false);
+    setNewAgentName("");
   };
 
   const renderColorPickerFormGroup = (labelText, fieldName) => {
@@ -170,6 +230,8 @@ const AgentsList = ({ agents }) => {
   );
 
   return (
+    <>
+    <ToastContainer />
     <Container>
       <Table>
         <thead>
@@ -193,6 +255,34 @@ const AgentsList = ({ agents }) => {
           ))}
         </tbody>
       </Table>
+
+    <div className="add-agent-button" onClick={handleAddAgent}>
+      +
+    </div>
+
+    <div>
+      <Dialog open={isAddingAgent} onClose={handleCancelAddAgent}>
+        <DialogTitle>Add New Agent</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+          </DialogContentText>
+          <TextField
+            // autoFocus
+            margin="dense"
+            id="name"
+            label="Enter agent name"
+            style={{ width: '500px' }}
+            variant="standard"
+            onChange={handleNewAgentNameChange}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelAddAgent}>Cancel</Button>
+          <Button onClick={handleAddNewAgent}>Add</Button>
+        </DialogActions>
+      </Dialog>
+    </div>
+      {/* The rest of your component's code goes here */}
 
       {selectedAgent && (
         <FormContainer>
@@ -289,6 +379,7 @@ const AgentsList = ({ agents }) => {
         </FormContainer>
       )}
     </Container>
+    </>
   );
 };
 
@@ -390,7 +481,7 @@ const Table = styled.table`
   }
 `;
 
-const Button = styled.button`
+const CustomButton = styled.button`
   padding: 0.5rem 1rem;
   border: none;
   border-radius: 0.5rem;
