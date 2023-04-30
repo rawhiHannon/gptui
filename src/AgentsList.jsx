@@ -144,8 +144,13 @@ const AgentsList = ({ agents, onAddAgent }) => {
   };
 
   const handleAddNewAgent = () => {
+    if(newAgentName == "") {
+      setIsAddingAgent(false);
+      showErrorNotification("Empty name!")
+      return
+    }
     const newAgent = {
-      name: newAgentName,
+      host: newAgentName,
     };
     for(let i in agents) {
       if(agents[i].host == newAgentName) {

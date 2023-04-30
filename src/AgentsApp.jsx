@@ -23,7 +23,7 @@ const AgentsApp = () => {
   };
 
   const onAddAgent = (agent) => {
-    setAgents({...agents, agent})
+    setAgents([...agents, agent])
   }
 
   const handleGoogleLoginSuccess = () => {

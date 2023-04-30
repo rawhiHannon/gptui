@@ -86,7 +86,7 @@ const ChatPreview = ({ agent, position, onStop }) => {
             type="text"
             value={inputValue}
             onChange={handleInputChange}
-            placeholder={agent.input_place_holder}
+            placeholder={agent.input_placeholder}
             onKeyDown={handleEnter}
             style={{ backgroundColor: agent.filling_box_background_color, color: agent.filling_text_color }}
           />
