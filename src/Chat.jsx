@@ -25,6 +25,7 @@ const Chat = () => {
   };
 
   const receiveChatMessage = (message) => {
+    alert(message)
     if(message == "") {
       return
     }

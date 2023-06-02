@@ -9,11 +9,16 @@ import GoogleLoginButton from './GoogleLoginButton';
 const AgentsApp = () => {
   const [agents, setAgents] = useState([]);
   const [activeTab, setActiveTab] = useState('welcome');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const handleSidebarButtonClick = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
   useEffect(() => {
     const fetchAgents = async () => {
-      const response = await axios.get('https://chat.agentaichat.com:2096/api/agent');
-      setAgents([response.data]);
+      const response = await axios.get('https://chat.agentaichat.com:2096/api/agents');
+      setAgents(response.data);
     };
     fetchAgents();
   }, []);
@@ -30,6 +35,7 @@ const AgentsApp = () => {
     // Do something after the user has successfully logged in
     console.log('User logged in successfully');
   };
+  <button className="crm__sidebar-button" onClick={handleSidebarButtonClick}>Open Sidebar</button>
 
   return (
     <>

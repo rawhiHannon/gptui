@@ -450,3 +450,14 @@ body,
 .add-agent-dialog input[type="text"]::placeholder {
   color: #999;
 }
+
+@media (max-width: 768px) {
+  .crm__sidebar {
+    display: none;
+  }
+
+  .crm__sidebar-button {
+    display: block;
+  }
+}
+
