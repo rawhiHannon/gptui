@@ -1,6 +1,6 @@
 function WebSocketsManager() {
     this.ws = null;
-    this.serverUrl = "ws://89.116.27.46:7777/api/ws";
+    this.serverUrl = "ws://localhost:7879/api/ws";
     this.roomInput = null;
     this.rooms = [];
     this.manager = null;
@@ -20,7 +20,7 @@ self.setManager = function(manager) {
 //TODO: handle reject
 self.connectToWebsocket = function() {
   return new Promise((resolve, reject) => {
-    this.ws = new WebSocket(this.serverUrl + "?bearer=1234dd56&host=agentbuddy.me");
+    this.ws = new WebSocket(this.serverUrl + "?bearer=1234dd56");
     this.ws.addEventListener('open', (event) => { this.onWebsocketOpen(event, resolve) });
     this.ws.addEventListener('message', (event) => { this.handleNewMessage(event) });
     this.ws.addEventListener('close', (event) => { this.handleClose(event) });
@@ -28,7 +28,7 @@ self.connectToWebsocket = function() {
 }
 
 self.handleClose = function(event) {
-    // alert("Server closed the connection, please refresh the page")
+    alert("Server closed the connection, please refresh the page")
 }
 
 self.onWebsocketOpen = function(event, resolve) {

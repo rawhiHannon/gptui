@@ -13,6 +13,8 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const chatMessagesRef = useRef(null);
   const [isTyping, setIsTyping] = useState(false);
+  const [ongoingMessageText, setOngoingMessageText] = useState('');
+  const [ongoingMessageId, setOngoingMessageId] = useState(null);
 
   useEffect(() => {
     chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
@@ -25,17 +27,28 @@ const Chat = () => {
   };
 
   const receiveChatMessage = (message) => {
-    alert(message)
-    if(message == "") {
-      return
+    if (message.text === "StreamComplete") {
+      if (ongoingMessageId !== null) {
+        const completedMessage = {
+          id: ongoingMessageId,
+          text: ongoingMessageText,
+          user: { name: "GPT", avatar: "gpt", color: "maroon" }
+        };
+        setMessages(messages => [...messages, completedMessage]);
+        setOngoingMessageText('');
+        setOngoingMessageId(null);
+      }
+      setIsTyping(false);
+      return;
     }
-    let msg = {
-      id: messages.length + 1, 
-      text: message, 
-      user: { name: "GPT", avatar: "gpt", color: "maroon" } 
+
+    // Update the ongoing message text
+    setOngoingMessageText(currentText => currentText + message.text);
+
+    // Set the message ID if it's the start of a new message
+    if (ongoingMessageId === null) {
+      setOngoingMessageId(messages.length + 1);
     }
-    setIsTyping(false);
-    setMessages([...messages, msg]);
   };
 
   manager.registerChatHandler(receiveChatMessage)
@@ -62,17 +75,11 @@ const Chat = () => {
   return (
     <div className="chat">
       <div className="chat-header">
-      <Select
-          className="chat-select"
-          labelId="select-label"
-          id="select-standard"
-          value={selectedUser}
-          onChange={handleChange}
-          label="Age"
-        >
-          <MenuItem value="math">math</MenuItem>
-          <MenuItem value="history">history</MenuItem>
-        </Select>
+      {isTyping && (
+        <div className="typing-indicator">
+          <p>gpt is typing...</p>
+        </div>
+      )}
       </div>
       <div className="chat-messages" ref={chatMessagesRef}>
         {messages.map(message => (
@@ -94,12 +101,12 @@ const Chat = () => {
             )}
           </div>
         ))}
-          {isTyping && (
-            <div className="typing-indicator">
-              <p>gpt is typing...</p>
-            
-            </div>
-          )}
+      {ongoingMessageId !== null && (
+        <div className="message other">
+          <Avatar sx={{ bgcolor: "maroon" }} style={{ width: "40px", height: "40px", marginRight: "10px" }}>gpt</Avatar>
+          <div className="text" style={{ alignSelf: "center" }}>{ongoingMessageText}</div>
+        </div>
+      )}
       </div>
       <div className="chat-input">
         <input
