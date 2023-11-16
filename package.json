@@ -34,7 +34,8 @@
     "react-resizable": "^3.0.5",
     "react-toastify": "^9.1.2",
     "reactstrap": "^9.1.9",
-    "styled-components": "^5.3.9"
+    "styled-components": "^5.3.9",
+    "use-sound": "^4.0.1"
   },
   "devDependencies": {
     "@types/react": "^18.0.27",
