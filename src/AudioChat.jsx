@@ -8,6 +8,9 @@ import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/Stop';
 import useSound from 'use-sound';
 import boopSfx from './interface-124464.mp3';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import ArchiveIcon from '@mui/icons-material/Archive';
+import ContentPasteSearchIcon from '@mui/icons-material/ContentPasteSearch';
 
 const AudioChat = () => {
   const [text, setText] = useState('');
@@ -96,16 +99,11 @@ const AudioChat = () => {
   }, []);
 
   const startRecording = () => {
+    play()
     setIsRecording(true);
     transcriptAccumulator.current = "";  // Clear accumulator
     setIsMouseDown(true);
     speechRecognitionRef.current.start();
-  };
-
-  const stopRecording = () => {
-    setIsRecording(false);
-    speechRecognitionRef.current.stop();
-    // Do not send the message here anymore
   };
 
   const processAudioQueue = () => {
@@ -196,8 +194,8 @@ const AudioChat = () => {
       if (!isProcessingAudio.current) {
         // processAudioQueue();
       }
-      // const transcribedText = "Recevied all chunks.";
-      // setMessages(messages => [...messages, { id: messages.length + 1, text: transcribedText, user: { name: "GPT", avatar: "gpt", color: "maroon" } }]);
+      const transcribedText = "Recevied all chunks.";
+      setMessages(messages => [...messages, { id: messages.length + 1, text: transcribedText, user: { name: "GPT", avatar: "gpt", color: "maroon" } }]);
     } else {
       // This block handles the incoming audio chunks
       if (!isAudioStreaming) {
@@ -227,6 +225,7 @@ const AudioChat = () => {
 
 
   const sendMessage = () => {
+    play()
     let msg = { 
       id: messages.length + 1, 
       text, 
@@ -238,6 +237,7 @@ const AudioChat = () => {
   };
 
   const sendTextMessage = (textData) => {
+    play()
     let newMessage = { 
       id: messages.length + 1, 
       text: textData, 
@@ -265,34 +265,54 @@ const AudioChat = () => {
   };
 
   return (
-    <div className="chat">
-<div className="chat-header">
-  <div className="assistant-label">
-    {/* <b>Assistant</b> */}
-  </div>
-</div>
+    <div>
 
-      <div className="chat-messages" ref={chatMessagesRef}>
-      {messages.map(message => (
-          <div
-            key={message.id}
-            className={`message ${message.user.name === "rawhi" ? 'me' : 'other'}`}
-            style={{ display: "flex", marginBottom: "10px" }}
-          >
-            {message.user.name === "rawhi" ? (
-              <>
-                <div className="text" style={{ alignSelf: "center" }}>{message.text}</div>
-                <Avatar sx={{ bgcolor: message.user.color }} style={{ width: "40px", height: "40px", marginLeft: "10px" }}>{message.user.avatar}</Avatar>
-              </>
-            ) : (
-              <>
-                <Avatar sx={{ bgcolor: message.user.color }} style={{ width: "40px", height: "40px", marginRight: "10px" }}>{message.user.avatar}</Avatar>
-                <div className="text" style={{ alignSelf: "center" }}>{message.text}</div>
-              </>
-            )}
-          </div>
-        ))}
-          <div className="head">
+    <div className="chat-container">
+  <div className="sidebar">
+
+  <div className="assistant-tab active">
+      <Avatar sx={{ bgcolor: "gray" }} style={{ width: "40px", height: "40px", marginRight: "10px" }} />
+      <div>
+        <span className="assistant-name">Assistant 1</span>
+        <div className="last-message">Last message...</div>
+      </div>
+    </div>
+    <div className="assistant-tab">
+      <Avatar sx={{ bgcolor: "gray" }} style={{ width: "40px", height: "40px", marginRight: "10px" }} />
+      <div>
+        <span className="assistant-name">Assistant 2</span>
+        <div className="last-message">Last message...</div>
+      </div>
+    </div>
+
+    {/* Add more tabs or elements here as needed */}
+  </div>
+
+  <div className="chat">
+  <div className="person-info">
+    <Avatar sx={{ bgcolor: "gray" }} style={{ width: "50px", height: "50px", marginRight: "10px" }} />
+    <div className="person-details">
+      <h2>Assistant1</h2>
+      <p>Online</p>
+    </div>
+    <div className="icon-container">
+      <MoreVertIcon />
+    </div>
+  </div>
+
+    <div className="chat-messages" ref={chatMessagesRef}>
+        {messages.map(message => (
+      <div
+        key={message.id}
+        className={`message ${message.user.name === "rawhi" ? 'me' : 'other'}`}
+      >
+        <div className="text">
+          {message.text}
+          <span className={`message-time ${message.user.name === "rawhi" ? 'me' : 'other'}`}>10:15</span>
+        </div>
+      </div>
+    ))}
+  <div className="head">
     <div className="eyebrow-container">
       <div className="eyebrow">
       </div>
@@ -318,17 +338,19 @@ const AudioChat = () => {
           onChange={e => setText(e.target.value)}
           onKeyDown={handleKeyDown}
         />
-        <Button disabled={!text} onClick={() => sendMessage()} variant="contained" endIcon={<SendIcon />} style={{ minWidth: "90px" }}>
-          Send
+        <Button disabled={!text} onClick={() => sendMessage()} variant="contained"
+        >
+        {<SendIcon />}
         </Button>
         <Button 
-          onMouseDown={startRecording} 
-          variant="contained" 
-          style={{ marginLeft: "2px", minWidth: "40px" }}
-        >
-          {isRecording ? <MicOffIcon  style={{ color: "red", marginLeft: "2px", minWidth: "40px" }} /> : <MicIcon onClick={play} />}
+        onMouseDown={startRecording} 
+        variant="contained"
+      >
+          {isRecording ? <MicOffIcon  style={{ color: "red", minWidth: "40px" }} /> : <MicIcon onClick={play} />}
         </Button>
       </div>
+    </div>
+    </div>
     </div>
   );
 };
