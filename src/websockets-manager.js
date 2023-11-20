@@ -13,11 +13,23 @@ function WebSocketsManager() {
   this.maxReconnectInterval = 30000;
   this.reconnectAttempts = 0;
   this.ready = this.connectToWebsocket();
+  this.connected = false
+  this.statusCallback = () => {}
 }
 var self = WebSocketsManager.prototype;
 
 self.setManager = function(manager) {
 this.manager = manager
+}
+
+self.setStatusCallback = function(callback) {
+  if(callback != null) {
+    this.statusCallback = callback;
+  }
+}
+
+self.isWSConnected = function() {
+  return this.connected
 }
 
 //TODO: handle reject
@@ -31,11 +43,13 @@ return new Promise((resolve, reject) => {
 }
 
 self.handleClose = function(event) {
-console.log("Server closed the connection, attempting to reconnect...");
-this.reconnectAttempts = 0; // Reset the number of reconnection attempts
-setTimeout(() => {
-    this.reconnect();
-}, this.reconnectInterval);
+  console.log("Server closed the connection, attempting to reconnect...");
+  this.connected = false
+  this.statusCallback(false)
+  this.reconnectAttempts = 0; // Reset the number of reconnection attempts
+  setTimeout(() => {
+      this.reconnect();
+  }, this.reconnectInterval);
 }
 
 self.reconnect = async function() {
@@ -60,6 +74,8 @@ self.onWebsocketOpen = function(event, resolve) {
       resolve();
     } catch(err) {}
   }
+  this.connected = true
+  this.statusCallback(true)
   console.log("connected to WS!");
 }
 

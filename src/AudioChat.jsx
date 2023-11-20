@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Manager from "./manager";
 import Button from '@mui/material/Button';
-import SendIcon from '@mui/icons-material/Send';
+import SendIcon from '@mui/icons-material/Add';
 import Avatar from '@mui/material/Avatar';
 import { faL } from "@fortawesome/free-solid-svg-icons";
 import MicIcon from '@mui/icons-material/Mic';
@@ -11,10 +11,15 @@ import boopSfx from './interface-124464.mp3';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import ContentPasteSearchIcon from '@mui/icons-material/ContentPasteSearch';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 
 const AudioChat = () => {
   const [text, setText] = useState('');
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(() => {
+    const storedMessages = localStorage.getItem('messages');
+    return storedMessages ? JSON.parse(storedMessages) : [];
+  });
   const audioQueue = useRef([]);
   const chatMessagesRef = useRef(null);
   const currentMessageAudioChunks = useRef([]);
@@ -26,6 +31,13 @@ const AudioChat = () => {
   const [ongoingMessageId, setOngoingMessageId] = useState(null);
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [hasSpeechEnded, setHasSpeechEnded] = useState(false);
+  const [isOnline, setIsOnline] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef(null);
+  const [isAudioEnabled, setIsAudioEnabled] = useState(true);
+
+  let isAudioStreaming = false;  
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
   useEffect(() => {
     // Add global mouseup event listener
@@ -48,8 +60,29 @@ const AudioChat = () => {
   }, [isMouseDown]);
 
   useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showMenu && menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+  
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMenu]);
+
+  useEffect(() => {
     Manager.registerChatHandler(receiveChatMessage);
   }, []);
+
+  useEffect(() => {
+    setIsOnline(Manager.isWSConnected());
+    Manager.setWSStatusCallback((status) => {
+      setIsOnline(status);
+    });    
+  }, []);
+
 
   useEffect(() => {
     chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
@@ -98,6 +131,26 @@ const AudioChat = () => {
     }
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem('messages', JSON.stringify(messages));
+    console.log('Messages saved:', messages); // For debugging
+  }, [messages]);
+
+  useEffect(() => {
+    const storedMessages = localStorage.getItem('messages');
+    if (storedMessages) {
+      setMessages(JSON.parse(storedMessages));
+      console.log('Loaded messages:', JSON.parse(storedMessages)); // For debugging
+    }
+  }, []);
+  
+  useEffect(() => {
+    const storedMessages = localStorage.getItem('messages');
+    if (storedMessages) {
+      setMessages(JSON.parse(storedMessages));
+    }
+  }, []);
+
   const startRecording = () => {
     play()
     setIsRecording(true);
@@ -121,7 +174,7 @@ const AudioChat = () => {
   };
   
   function playNextAudioChunk() {
-    if (isPlaying || currentMessageAudioChunks.current.length === 0) {
+    if (isPlaying || currentMessageAudioChunks.current.length === 0 || !isAudioEnabled) {
       // Already playing or no chunks to play
       return;
     }
@@ -129,13 +182,8 @@ const AudioChat = () => {
     setIsGptSpeaking(true);
     isPlaying = true;
   
-    // Determine if the last item is "StreamComplete"
     const hasStreamComplete = currentMessageAudioChunks.current[currentMessageAudioChunks.current.length - 1] === "StreamComplete";
-  
-    // Extract all chunks except "StreamComplete" if it's present
     const audioBlobs = hasStreamComplete ? currentMessageAudioChunks.current.slice(0, -1) : [...currentMessageAudioChunks.current];
-    
-    // Clear the array except for "StreamComplete" if it's present
     currentMessageAudioChunks.current = hasStreamComplete ? ["StreamComplete"] : [];
   
     if (audioBlobs.length === 0) {
@@ -171,18 +219,6 @@ const AudioChat = () => {
     console.error("Error decoding audio data: " + e.err);
     isPlaying = false;
     setIsGptSpeaking(false);
-  }
-
-
-  // const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  let isAudioStreaming = false;  
-
-  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-  async function sendAudioToSTTService(audioBlob) {
-    // Implement the actual call to the STT service here
-    // Return the transcribed text
-    return "Transcribed text from audio";
   }
 
   const receiveChatMessage = (message) => {
@@ -254,7 +290,7 @@ const AudioChat = () => {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && text != "") {
       sendMessage();
     }
   };
@@ -269,13 +305,30 @@ const AudioChat = () => {
     }
   };
 
+  const toggleMenu = () => {
+    setShowMenu(!showMenu);
+  };
+
+  const clearHistory = () => {
+    setMessages([]);
+    localStorage.removeItem('messages');
+    setShowMenu(false);
+  };
+
+  const toggleAudio = (event) => {
+    event.stopPropagation();
+    setIsAudioEnabled(!isAudioEnabled);
+  };
+
   return (
     <div>
 
     <div className="chat-container">
   <div className="sidebar">
+  <div className="person-info">
 
-  <div className="assistant-tab active">
+</div>
+    <div className="assistant-tab active">
       <Avatar sx={{ bgcolor: "gray" }} style={{ width: "40px", height: "40px", marginRight: "10px" }} />
       <div>
         <span className="assistant-name">Assistant 1</span>
@@ -295,28 +348,6 @@ const AudioChat = () => {
 
   <div className="chat">
   <div className="person-info">
-    <Avatar sx={{ bgcolor: "gray" }} style={{ width: "50px", height: "50px", marginRight: "10px" }} />
-    <div className="person-details">
-      <h2>Assistant1</h2>
-      <p>Online</p>
-    </div>
-    <div className="icon-container">
-      <MoreVertIcon />
-    </div>
-  </div>
-
-    <div className="chat-messages" ref={chatMessagesRef}>
-        {messages.map(message => (
-      <div
-        key={message.id}
-        className={`message ${message.user.name === "rawhi" ? 'me' : 'other'}`}
-      >
-        <div className="text">
-          {message.text}
-          <span className={`message-time ${message.user.name === "rawhi" ? 'me' : 'other'}`}>10:15</span>
-        </div>
-      </div>
-    ))}
   <div className="head">
     <div className="eyebrow-container">
       <div className="eyebrow">
@@ -335,6 +366,43 @@ const AudioChat = () => {
     <div className="nose"></div>
     {isGptSpeaking ? <div className="mouth"></div> : <div className="nospeak-mouth"></div>}
   </div>
+    <div className="person-details">
+      <h2>Assistant1</h2>
+      {/* Conditionally render the "Online" text */}
+      {isOnline && <p>Online</p>}
+    </div>
+    <div className="icon-container">
+    <div className="speaker-icon-container">
+        {isAudioEnabled ? (
+          <VolumeUpIcon onClick={toggleAudio} />
+        ) : (
+          <VolumeOffIcon onClick={toggleAudio} />
+        )}
+      </div>
+
+      <MoreVertIcon onClick={toggleMenu} />
+      {showMenu && (
+        <div ref={menuRef} className="menu">
+          <div className="menu-item" onClick={clearHistory}>Clear History</div>
+          <div className="menu-item">Settings</div>
+        </div>
+      )}
+    </div>
+  </div>
+
+    <div className="chat-messages" ref={chatMessagesRef}>
+        {messages.map(message => (
+      <div
+        key={message.id}
+        className={`message ${message.user.name === "rawhi" ? 'me' : 'other'}`}
+      >
+        <div className="text">
+          {message.text}
+          <span className={`message-time ${message.user.name === "rawhi" ? 'me' : 'other'}`}>10:15</span>
+        </div>
+      </div>
+    ))}
+
       </div>
       <div className="chat-input">
         <input

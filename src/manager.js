@@ -67,6 +67,14 @@ class Manager {
     this.chatHandler = handler;
   }
 
+  isWSConnected() {
+    return WebSocketsManager.isWSConnected()
+  }
+
+  setWSStatusCallback(callback) {
+    WebSocketsManager.setStatusCallback(callback);
+  }
+
   changePrompt(user) {
     if(user == "history") {
       WebSocketsManager.sendSettingsMessage(prompt2);
