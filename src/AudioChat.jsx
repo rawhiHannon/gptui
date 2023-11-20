@@ -22,7 +22,8 @@ const AudioChat = () => {
   const isProcessingAudio = useRef(false);
   const [isGptSpeaking, setIsGptSpeaking] = useState(false);
   const [play] = useSound(boopSfx);
-
+  const [ongoingMessageText, setOngoingMessageText] = useState('');
+  const [ongoingMessageId, setOngoingMessageId] = useState(null);
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [hasSpeechEnded, setHasSpeechEnded] = useState(false);
 
@@ -65,7 +66,6 @@ const AudioChat = () => {
 
   const [isRecording, setIsRecording] = useState(false);
   const speechRecognitionRef = useRef(null);
-  const audioStartRef = useRef(new Audio('interface-124464.mp3'));
   const transcriptAccumulator = useRef("");  // Local variable for accumulating transcript
 
   // Initialize Speech Recognition
@@ -186,29 +186,34 @@ const AudioChat = () => {
   }
 
   const receiveChatMessage = (message) => {
-    if (message.text === "StreamComplete") {
-      isAudioStreaming = false;
-      audioQueue.current.push([...historyMessageAudioChunks.current]);
-      historyMessageAudioChunks.current = [];
-      historyMessageAudioChunks.current.push(message.text);
-      if (!isProcessingAudio.current) {
-        // processAudioQueue();
-      }
-      const transcribedText = "Recevied all chunks.";
-      setMessages(messages => [...messages, { id: messages.length + 1, text: transcribedText, user: { name: "GPT", avatar: "gpt", color: "maroon" } }]);
-    } else {
-      // This block handles the incoming audio chunks
-      if (!isAudioStreaming) {
-        isAudioStreaming = true;
+    if (message.text) {
+      setMessages(messages => [...messages, {
+        id: messages.length + 1,
+        text: message.text,
+        user: { name: "GPT", avatar: "gpt", color: "maroon" }
+      }]);
+    } else if (message.stream) {
+      if (message.stream === "StreamComplete") {
+        isAudioStreaming = false;
+        audioQueue.current.push([...historyMessageAudioChunks.current]);
         historyMessageAudioChunks.current = [];
-      }
+        historyMessageAudioChunks.current.push(message.stream);
+        if (!isProcessingAudio.current) {
+          // processAudioQueue();
+        }
+      } else {
+        if (!isAudioStreaming) {
+          isAudioStreaming = true;
+          historyMessageAudioChunks.current = [];
+        }
 
-      const audioBlob = base64ToBlob(message.text, 'audio/mpeg');
-      currentMessageAudioChunks.current.push(audioBlob);
-      historyMessageAudioChunks.current.push(audioBlob);
+        const audioBlob = base64ToBlob(message.stream, 'audio/mpeg');
+        currentMessageAudioChunks.current.push(audioBlob);
+        historyMessageAudioChunks.current.push(audioBlob);
 
-      if (isPlaying == false) {
-        playNextAudioChunk();
+        if (isPlaying == false) {
+          playNextAudioChunk();
+        }
       }
     }
   };
