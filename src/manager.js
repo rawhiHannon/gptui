@@ -56,12 +56,13 @@ class Manager {
   }
 
   send(message) {
-    // if (message != "hi") {
-    //   message += `
-    //   ` + message + '!'
-    // }
     WebSocketsManager.sendChatMessage(message);
   }
+
+  sendStream(message) {
+    WebSocketsManager.sendStreamMessage(message);
+  }
+
 
   registerChatHandler(handler) {
     this.chatHandler = handler;

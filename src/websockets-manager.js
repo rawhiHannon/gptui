@@ -136,6 +136,14 @@ await this.ready;
   }));
 }
 
+self.sendStreamMessage = async function(msg) {
+  await this.ready;
+    this.ws.send(JSON.stringify({
+      action: 'stream',
+      audio: msg
+    }));
+}  
+
 self.sendSettingsMessage = async function(data) {
 await this.ready;
 this.ws.send(JSON.stringify({

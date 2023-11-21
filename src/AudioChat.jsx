@@ -1,18 +1,24 @@
 import React, { useState, useEffect, useRef } from "react";
 import Manager from "./manager";
 import Button from '@mui/material/Button';
-import SendIcon from '@mui/icons-material/Add';
+import SendIcon from '@mui/icons-material/Send';
 import Avatar from '@mui/material/Avatar';
-import { faL } from "@fortawesome/free-solid-svg-icons";
-import MicIcon from '@mui/icons-material/Mic';
-import MicOffIcon from '@mui/icons-material/Stop';
 import useSound from 'use-sound';
 import boopSfx from './interface-124464.mp3';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ArchiveIcon from '@mui/icons-material/Archive';
-import ContentPasteSearchIcon from '@mui/icons-material/ContentPasteSearch';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import IconButton from '@mui/material/IconButton';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import SettingsIcon from '@mui/icons-material/Settings';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import SearchIcon from '@mui/icons-material/Search';
+import CallIcon from '@mui/icons-material/Call';
+import AddIcon from '@mui/icons-material/Add';
+import AudioRecorder from './AudioRecorder';
+import SpeechRecognition from './SpeechRecognition'
 
 const AudioChat = () => {
   const [text, setText] = useState('');
@@ -27,10 +33,6 @@ const AudioChat = () => {
   const isProcessingAudio = useRef(false);
   const [isGptSpeaking, setIsGptSpeaking] = useState(false);
   const [play] = useSound(boopSfx);
-  const [ongoingMessageText, setOngoingMessageText] = useState('');
-  const [ongoingMessageId, setOngoingMessageId] = useState(null);
-  const [isMouseDown, setIsMouseDown] = useState(false);
-  const [hasSpeechEnded, setHasSpeechEnded] = useState(false);
   const [isOnline, setIsOnline] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef(null);
@@ -38,26 +40,6 @@ const AudioChat = () => {
 
   let isAudioStreaming = false;  
   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-  useEffect(() => {
-    // Add global mouseup event listener
-    const handleGlobalMouseUp = () => {
-      if (isMouseDown) {
-        setIsRecording(false); // Stop recording when mouse is released
-        setIsMouseDown(false);
-        if (hasSpeechEnded && transcriptAccumulator.current.trim().length > 0) {
-          sendTextMessage(transcriptAccumulator.current);
-          transcriptAccumulator.current = "";
-        }
-      }
-    };
-
-    window.addEventListener('mouseup', handleGlobalMouseUp);
-
-    return () => {
-      window.removeEventListener('mouseup', handleGlobalMouseUp);
-    };
-  }, [isMouseDown]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -96,51 +78,14 @@ const AudioChat = () => {
     }
   }, [isPlaying]);
 
-
-  const [isRecording, setIsRecording] = useState(false);
-  const speechRecognitionRef = useRef(null);
-  const transcriptAccumulator = useRef("");  // Local variable for accumulating transcript
-
-  // Initialize Speech Recognition
-  useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      speechRecognitionRef.current = new SpeechRecognition();
-      speechRecognitionRef.current.continuous = false;
-      speechRecognitionRef.current.lang = 'en-US';
-      speechRecognitionRef.current.interimResults = false;
-
-      speechRecognitionRef.current.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        transcriptAccumulator.current += transcript; // Accumulate transcript
-      };
-
-      speechRecognitionRef.current.onend = () => {
-        setHasSpeechEnded(true);
-        if (!isMouseDown && transcriptAccumulator.current.trim().length > 0) {
-          sendTextMessage(transcriptAccumulator.current);
-          transcriptAccumulator.current = "";
-        }
-      };
-
-      speechRecognitionRef.current.onerror = (event) => {
-        console.error('Speech recognition error', event.error);
-      };
-    } else {
-      console.error('Speech recognition not supported in this browser.');
-    }
-  }, []);
-
   useEffect(() => {
     localStorage.setItem('messages', JSON.stringify(messages));
-    console.log('Messages saved:', messages); // For debugging
   }, [messages]);
 
   useEffect(() => {
     const storedMessages = localStorage.getItem('messages');
     if (storedMessages) {
       setMessages(JSON.parse(storedMessages));
-      console.log('Loaded messages:', JSON.parse(storedMessages)); // For debugging
     }
   }, []);
   
@@ -150,14 +95,6 @@ const AudioChat = () => {
       setMessages(JSON.parse(storedMessages));
     }
   }, []);
-
-  const startRecording = () => {
-    play()
-    setIsRecording(true);
-    transcriptAccumulator.current = "";  // Clear accumulator
-    setIsMouseDown(true);
-    speechRecognitionRef.current.start();
-  };
 
   const processAudioQueue = () => {
     if (audioQueue.current.length > 0 && !isProcessingAudio.current) {
@@ -222,11 +159,17 @@ const AudioChat = () => {
   }
 
   const receiveChatMessage = (message) => {
-    if (message.text) {
+    if (message.transcription) {
+      setMessages(messages => [...messages, {
+        id: messages.length + 1,
+        text: message.transcription,
+        user: { name: "rawhi" }
+      }]);
+    } else if (message.text) {
       setMessages(messages => [...messages, {
         id: messages.length + 1,
         text: message.text,
-        user: { name: "GPT", avatar: "gpt", color: "maroon" }
+        user: { name: "GPT" }
       }]);
     } else if (message.stream) {
       if (message.stream === "StreamComplete") {
@@ -295,16 +238,6 @@ const AudioChat = () => {
     }
   };
 
-  const toggleRecording = () => {
-    setIsManuallyStopped(isRecording);
-    setIsRecording(!isRecording);
-    if (!isRecording) {
-      speechRecognitionRef.current.start();
-    } else {
-      speechRecognitionRef.current.stop();
-    }
-  };
-
   const toggleMenu = () => {
     setShowMenu(!showMenu);
   };
@@ -320,67 +253,96 @@ const AudioChat = () => {
     setIsAudioEnabled(!isAudioEnabled);
   };
 
+  const handleAudioComplete = (base64audio, blob) => {
+    Manager.sendStream(base64audio)
+  };
+
+  const handleOnSpeechText = (text) => {
+    sendTextMessage(text)
+  }
+
   return (
     <div>
 
     <div className="chat-container">
-  <div className="sidebar">
-  <div className="person-info">
+  
+    <div className="sidebar">
+      <div className="sidebar-header">
+        <Avatar sx={{ bgcolor: "gray" }} style={{ width: "40px", height: "40px", marginRight: "10px" }} />
+    
+        <div className="header-icons">
+          <IconButton style={{ color: '#3f6eb5', outline: 'none' }}><ArchiveIcon /></IconButton>
+          <IconButton style={{ color: '#3f6eb5', outline: 'none' }}><PersonAddIcon /></IconButton>
+          <IconButton style={{ color: '#3f6eb5', outline: 'none' }}><SettingsIcon /></IconButton>
+        </div>
+      </div>
+      <div className="search-ph">
+      <TextField
+      className="search-box"
+      variant="standard" 
+      placeholder="Search..."
+      InputProps={{
+        disableUnderline: true,
+        startAdornment: (
+          <InputAdornment position="start">
+            <SearchIcon />
+          </InputAdornment>
+        ),
+      }}
+    />
 
-</div>
+  </div>
+  {/* Scrollable Assistant List */}
+  <div className="assistant-list">
     <div className="assistant-tab active">
-      <Avatar sx={{ bgcolor: "gray" }} style={{ width: "40px", height: "40px", marginRight: "10px" }} />
+    <div className="avatar"></div>
       <div>
-        <span className="assistant-name">Assistant 1</span>
+        <span className="assistant-name">Pizzaa</span>
         <div className="last-message">Last message...</div>
       </div>
     </div>
     <div className="assistant-tab">
-      <Avatar sx={{ bgcolor: "gray" }} style={{ width: "40px", height: "40px", marginRight: "10px" }} />
+    <div className="avatar"></div>
       <div>
-        <span className="assistant-name">Assistant 2</span>
+        <span className="assistant-name">Bezeq Support</span>
         <div className="last-message">Last message...</div>
       </div>
     </div>
-
-    {/* Add more tabs or elements here as needed */}
+    <div className="assistant-tab">
+    <div className="avatar"></div>
+      <div>
+        <span className="assistant-name">Panda Support</span>
+        <div className="last-message">Last message...</div>
+      </div>
+    </div>
+    
+    {/* ... more assistant tabs ... */}
   </div>
+</div>
+
 
   <div className="chat">
   <div className="person-info">
-  <div className="head">
-    <div className="eyebrow-container">
-      <div className="eyebrow">
-      </div>
-      <div className="eyebrow">
-      </div>
-    </div>
-    <div className="eyes-container">
-      <div className="eye">
-        <div className="pupil"></div>
-      </div>
-      <div className="eye">
-        <div className="pupil"></div>
-      </div>
-    </div>
-    <div className="nose"></div>
-    {isGptSpeaking ? <div className="mouth"></div> : <div className="nospeak-mouth"></div>}
-  </div>
+  <Avatar sx={{ bgcolor: "gray" }} style={{ width: "40px", height: "40px", marginRight: "10px" }} />
+
     <div className="person-details">
-      <h2>Assistant1</h2>
+      <h2>Pizzaa</h2>
       {/* Conditionally render the "Online" text */}
       {isOnline && <p>Online</p>}
     </div>
     <div className="icon-container">
+    <IconButton style={{ color: '#3f6eb5', outline: 'none' }}><CallIcon /></IconButton>
+
     <div className="speaker-icon-container">
+
         {isAudioEnabled ? (
-          <VolumeUpIcon onClick={toggleAudio} />
+          <IconButton style={{ color: '#3f6eb5', outline: 'none' }}><VolumeUpIcon onClick={toggleAudio} /></IconButton>
         ) : (
-          <VolumeOffIcon onClick={toggleAudio} />
+          <IconButton style={{ color: '#3f6eb5', outline: 'none' }}><VolumeOffIcon onClick={toggleAudio} /></IconButton>
         )}
       </div>
 
-      <MoreVertIcon onClick={toggleMenu} />
+      <IconButton onClick={toggleMenu} style={{ color: '#3f6eb5', outline: 'none' }}><MoreVertIcon /></IconButton>
       {showMenu && (
         <div ref={menuRef} className="menu">
           <div className="menu-item" onClick={clearHistory}>Clear History</div>
@@ -396,6 +358,26 @@ const AudioChat = () => {
         key={message.id}
         className={`message ${message.user.name === "rawhi" ? 'me' : 'other'}`}
       >
+      {message.user.name === "GPT" && message.id === messages.length && isGptSpeaking && (
+        <div className="head">
+        <div className="eyebrow-container">
+          <div className="eyebrow">
+          </div>
+          <div className="eyebrow">
+          </div>
+        </div>
+        <div className="eyes-container">
+          <div className="eye">
+            <div className="pupil"></div>
+          </div>
+          <div className="eye">
+            <div className="pupil"></div>
+          </div>
+        </div>
+        <div className="nose"></div>
+        {isGptSpeaking ? <div className="mouth"></div> : <div className="nospeak-mouth"></div>}
+      </div>
+      )}
         <div className="text">
           {message.text}
           <span className={`message-time ${message.user.name === "rawhi" ? 'me' : 'other'}`}>10:15</span>
@@ -405,22 +387,21 @@ const AudioChat = () => {
 
       </div>
       <div className="chat-input">
+        {/* <IconButton style={{ outline: 'none' }}><AddIcon /></IconButton> */}
         <input
           type="text"
           value={text}
           onChange={e => setText(e.target.value)}
+          placeholder="Type a message"
           onKeyDown={handleKeyDown}
         />
-        <Button disabled={!text} onClick={() => sendMessage()} variant="contained"
-        >
-        {<SendIcon />}
-        </Button>
-        <Button 
-        onMouseDown={startRecording} 
-        variant="contained"
-      >
-          {isRecording ? <MicOffIcon  style={{ color: "red", minWidth: "40px" }} /> : <MicIcon onClick={play} />}
-        </Button>
+        {
+          text
+            ? <Button onClick={() => sendMessage()} variant="contained">
+                <SendIcon />
+              </Button>
+            : <AudioRecorder onRecordingComplete={handleAudioComplete} />
+        }
       </div>
     </div>
     </div>

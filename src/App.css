@@ -10,54 +10,98 @@ body {
   margin: 0;
   padding: 0;
   height: 100vh;
-  background: linear-gradient(to bottom, #3f51b5 0%, #3f51b5 14%, #f2f2f5 14%, #f2f2f5 100%);
-  /* Blue (#3f51b5) for the top 30% and light gray (#f2f2f5) for the bottom 70% */
+  /* background: linear-gradient(to bottom, #3f6eb5 0%, #3f6eb5 20%, #3f6eb5 20%, #d3d3d3 0%); */
+  /* Blue (#3f6eb5) for the top 14% and a deeper gray (#d3d3d3) for the bottom 86% */
   font-family: Arial, sans-serif; /* Example font */
+}
+
+.search-and-icons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+}
+
+.search-box {
+  flex-grow: 1;
+  padding: 8px;
+  /* margin-right: 10px; */
+  border: 0px solid #ccc;
+  border-radius: 5px; /* Rounded corners for modern look */
+  outline: none;
 }
 
 .chat-container {
   display: flex;
-  width: 50vw;
+  width: 60vw;
   height: 95vh;
-  border: 1px solid #e0e0e0; /* Light border for the whole container */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+  /* background-color: #d3d3d3; */
+  border-right: 1px solid #e0e0e0; /* Subtle border */
 }
 
 .sidebar {
-  width: 350px;
-  background-color: #fff; /* White background for a clean look */
-  overflow-y: auto;
-  border-right: 1px solid #636da4; /* Subtle border */
+  width: 25vw;
+  max-height: calc(100vh); /* Adjust height as needed, assuming there's a header of 60px */
+  background-color: #fff;
+  border-right: 0px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto; /* Enables vertical scrolling */
+  border-right: 0px solid #636da4; /* Subtle border */
   /* margin-right: 2px; */
+}
+
+.assistant-list {
+  overflow-y: auto; /* Enables scrolling for the assistant list */
+  flex-grow: 1; /* Allows the list to take up the remaining height */
+  border-right: 0px solid #636da4;
 }
 
 .assistant-tab {
   display: flex;
   align-items: center;
   padding: 15px;
-  border-bottom: 1px solid #f0f0f0; /* Light border for separation */
-  transition: background-color 0.2s ease-in-out;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 18px;
+  text-align: center;
+  background-color: #f2f2f2; /* Softer color for the tabs */
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
 }
 
-.assistant-tab:hover {
-  background-color: #f9f9f9; /* Slight change on hover */
+.avatar {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #ccc; /* Primary color for avatar */
+  margin-right: 10px;
+  border: 2px solid #ffffff; /* White border for contrast */
 }
 
-.assistant-tab.active {
-  background-color: #e0e0e0; /* Distinct color for active tab */
+.assistant-tab:hover, .assistant-tab.active {
+  background-color: #dae0e5; /* Lighter shade for hover or active */
+  color: #333; /* Ensuring text color is visible on the lighter background */
 }
 
 .assistant-name {
-  font-weight: 500;
-  color: #333;
-  margin-left: 10px;
+  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Aligns content to the left */
+  flex-grow: 1; /* Ensures it takes available space */
 }
 
 .last-message {
   font-size: 14px;
   color: #666;
-  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Aligns content to the left */
+  flex-grow: 1; /* Ensures it takes available space */
 }
+
 
 .app-header {
   width: 100%;
@@ -67,35 +111,40 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.sidebar-header, .person-info {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px;
-  border-bottom: 1px solid gray;
-  background-color: #f8f8f8;
-  height: 50px; /* Set a fixed height */
-}
 
 .sidebar-header {
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* Aligns items to the left */
+  justify-content: space-between;
   padding: 10px;
-  border-bottom: 1px solid gray;
-  color: #3f51b5;
-}
-
-.sidebar-header svg {
-  margin-right: 10px; /* Adds some space between the icons */
+  border-bottom: 2px solid #3f6eb5;
+  border-left: 1px solid #e0e0e0;
+  border-top: 1px solid #e0e0e0;
+  min-height: 50px;
+  height: 50px; /* Set a fixed height */
+  background-color: #fff;
 }
 
 .person-info {
   display: flex;
   align-items: center;
   padding: 10px;
-  border-bottom: 0px solid #636da4;
-  background-color: #d1d1d1;
+  border-bottom: 2px solid #3f6eb5;
+  border-top: 1px solid #e0e0e0;
+  background-color: #fff;
+  height: 50px; /* Set a fixed height */
+  min-height: 50px;
+}
+
+.search-ph {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #3f6eb5;
+  border-left: 1px solid #e0e0e0;
+  background-color: #fff;
+  height: 15px; /* Set a fixed height */
+  min-height: 15px;
 }
 
 .person-details {
@@ -125,6 +174,10 @@ body {
   /* Add any other styling as needed */
 }
 
+.icon-button:focus {
+  outline: 2px solid #636da4; /* Custom focus outline color */
+}
+
 .menu {
   position: absolute;
   top: 100%;
@@ -135,12 +188,18 @@ body {
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Aligns content to the left */
 }
 
 .menu-item {
   padding: 8px 16px;
   cursor: pointer;
   color: #333;
+  width: 100%; /* Ensures each item takes up the full width of the menu */
+  box-sizing: border-box; /* Includes padding and border in the width */
+  text-align: left; /* Optional: Aligns text to the left */
 }
 
 .menu-item:hover {
@@ -190,11 +249,13 @@ body {
 }
 
 .message.me .text {
-  background-color: #636da4; /* Green background for sent messages */
+  background-color: #3f6eb5; /* Green background for sent messages */
   color: #fff; /* Dark text for readability */
   border-radius: 7px;
   padding: 6px 10px;
   margin-right: 5px;
+  /* background-color: #636da4;  */
+  border-bottom-right-radius: 0; /* Adjust corner for self messages */
 }
 
 .chat {
@@ -206,7 +267,8 @@ body {
   background-color: #f2f2f2;
   /* border-radius: 10px; */
   /* margin: 20px auto; */
-  box-shadow: 0px 0px 0px #ccc;
+  box-shadow: 4px 2px 4px rgba(0, 0, 0, 0.1);
+  border-left: 1px solid #e0e0e0;
 }
 
 
@@ -370,10 +432,6 @@ body {
   text-align: left;
 }
 
-.message.me .text {
-  background-color: #636da4; /* Light green background for self messages */
-  border-bottom-right-radius: 0; /* Adjust corner for self messages */
-}
 
 .message.other .text {
   border-bottom-left-radius: 0; /* Adjust corner for other messages */
@@ -403,11 +461,11 @@ body {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  border: 1px solid #636da4;
+  border: 2px solid #3f6eb5;
   border-left: 0px;
   border-right: 0px;
   /* border-top: 0px; */
-  border-bottom: 0px;
+  border-bottom: 1px solid #e0e0e0;
   padding-top: 2px;
   padding-bottom: 2px;
   background-color: rgb(245, 242, 242);
@@ -430,21 +488,20 @@ body {
 }
 
 .chat-input button {
-  background-color: #3f51b5;
+  background-color: #3f6eb5;
   color: white;
   margin: 2px;
   margin-left: 5px;
   margin-right: 5px;
   /* font-size: 16px; */
   cursor: pointer;
-  /* outline: none;
-  border: none; */
+  outline: none;
+  border: none;
   height: 39px;
   /* transition: all 0.3s ease-in-out; */
   border-radius: 50%;
   min-width: 0;
   width: 40px;
-  
 }
 
 .chat-input button:hover {
