@@ -144,6 +144,14 @@ self.sendStreamMessage = async function(msg) {
     }));
 }  
 
+self.sendVoiceMessage = async function(msg) {
+  await this.ready;
+    this.ws.send(JSON.stringify({
+      action: 'voice',
+      audio: msg
+    }));
+}  
+
 self.sendSettingsMessage = async function(data) {
 await this.ready;
 this.ws.send(JSON.stringify({

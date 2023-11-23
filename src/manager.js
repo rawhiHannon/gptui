@@ -63,6 +63,10 @@ class Manager {
     WebSocketsManager.sendStreamMessage(message);
   }
 
+  sendVoice(message) {
+    WebSocketsManager.sendVoiceMessage(message);
+  }
+
 
   registerChatHandler(handler) {
     this.chatHandler = handler;

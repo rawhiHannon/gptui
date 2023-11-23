@@ -15,10 +15,10 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
-import CallIcon from '@mui/icons-material/Call';
 import AddIcon from '@mui/icons-material/Add';
 import AudioRecorder from './AudioRecorder';
 import SpeechRecognition from './SpeechRecognition'
+import AudioStreamer from "./AudioStreamer";
 
 const AudioChat = () => {
   const [text, setText] = useState('');
@@ -35,6 +35,7 @@ const AudioChat = () => {
   const [play] = useSound(boopSfx);
   const [isOnline, setIsOnline] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [isOnCall, setOnCall] = useState(false);
   const menuRef = useRef(null);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
 
@@ -253,12 +254,18 @@ const AudioChat = () => {
     setIsAudioEnabled(!isAudioEnabled);
   };
 
-  const handleAudioComplete = (base64audio, blob) => {
+  const handleAudioStream = (base64audio) => {
+    if(base64audio === "start") {
+      setOnCall(true)
+    }
+    if(base64audio === "CloseStream") {
+      setOnCall(false)
+    }
     Manager.sendStream(base64audio)
   };
 
-  const handleOnSpeechText = (text) => {
-    sendTextMessage(text)
+  const handleAudio = (base64audio, blob) => {
+    Manager.sendVoice(base64audio)
   }
 
   return (
@@ -331,7 +338,7 @@ const AudioChat = () => {
       {isOnline && <p>Online</p>}
     </div>
     <div className="icon-container">
-    <IconButton style={{ color: '#3f6eb5', outline: 'none' }}><CallIcon /></IconButton>
+    <AudioStreamer status={isOnline} onAudioStream={handleAudioStream} talkingStatus={isGptSpeaking} />
 
     <div className="speaker-icon-container">
 
@@ -358,7 +365,7 @@ const AudioChat = () => {
         key={message.id}
         className={`message ${message.user.name === "rawhi" ? 'me' : 'other'}`}
       >
-      {message.user.name === "GPT" && message.id === messages.length && isGptSpeaking && (
+      {message.user.name === "GPT" && message.id === messages.length && isGptSpeaking && !isOnCall && (
         <div className="head">
         <div className="eyebrow-container">
           <div className="eyebrow">
@@ -400,7 +407,7 @@ const AudioChat = () => {
             ? <Button onClick={() => sendMessage()} variant="contained">
                 <SendIcon />
               </Button>
-            : <AudioRecorder onRecordingComplete={handleAudioComplete} />
+            :  <AudioRecorder onRecordingComplete={handleAudio} status={isOnline} />
         }
       </div>
     </div>

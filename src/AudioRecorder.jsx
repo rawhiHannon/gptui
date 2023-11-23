@@ -5,7 +5,7 @@ import MicOffIcon from '@mui/icons-material/Stop';
 import useSound from 'use-sound';
 import boopSfx from './interface-124464.mp3';
 
-const AudioRecorder = ({ onRecordingComplete }) => {
+const AudioRecorder = ({ onRecordingComplete, status }) => {
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -33,6 +33,7 @@ const AudioRecorder = ({ onRecordingComplete }) => {
   }, [isMouseDown]);
 
   const startRecording = async () => {
+    setIsMouseDown(true);
     play();
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -87,7 +88,9 @@ const AudioRecorder = ({ onRecordingComplete }) => {
         onMouseDown={startRecording} 
         onMouseUp={stopRecording}
         variant="contained"
-        style={{outline: "none"}}
+        style={{
+          outline: "none",
+        }}
       >
         {isRecording ? <MicOffIcon style={{ color: "red", minWidth: "40px" }} /> : <MicIcon />}
       </Button>
