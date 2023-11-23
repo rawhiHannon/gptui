@@ -12,13 +12,13 @@ import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import IconButton from '@mui/material/IconButton';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import SettingsIcon from '@mui/icons-material/Settings';
-import TextField from '@mui/material/TextField';
-import InputAdornment from '@mui/material/InputAdornment';
-import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import AudioRecorder from './AudioRecorder';
 import SpeechRecognition from './SpeechRecognition'
 import AudioStreamer from "./AudioStreamer";
+import useAudioPlayer from './AudioPlayer'; // Adjust the path as per your project structure
+import GptFace from "./GptFace";
+import Contacts from "./Contacts";
 
 const AudioChat = () => {
   const [text, setText] = useState('');
@@ -26,21 +26,22 @@ const AudioChat = () => {
     const storedMessages = localStorage.getItem('messages');
     return storedMessages ? JSON.parse(storedMessages) : [];
   });
-  const audioQueue = useRef([]);
   const chatMessagesRef = useRef(null);
-  const currentMessageAudioChunks = useRef([]);
-  const historyMessageAudioChunks = useRef([]);
-  const isProcessingAudio = useRef(false);
-  const [isGptSpeaking, setIsGptSpeaking] = useState(false);
   const [play] = useSound(boopSfx);
   const [isOnline, setIsOnline] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isOnCall, setOnCall] = useState(false);
   const menuRef = useRef(null);
+  const [isGptSpeaking, setIsGptSpeaking] = useState(false);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
 
-  let isAudioStreaming = false;  
-  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  const handleGptSpeakingChange = (isSpeaking) => {
+    setIsGptSpeaking(isSpeaking);
+  };
+
+  const {
+    addAudioToQueue,
+  } = useAudioPlayer(handleGptSpeakingChange, isAudioEnabled);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -71,14 +72,6 @@ const AudioChat = () => {
     chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
   }, [messages]);
 
-  let isPlaying = false;
-
-  useEffect(() => {
-    if (!isPlaying) {
-      setIsGptSpeaking(false);
-    }
-  }, [isPlaying]);
-
   useEffect(() => {
     localStorage.setItem('messages', JSON.stringify(messages));
   }, [messages]);
@@ -97,68 +90,6 @@ const AudioChat = () => {
     }
   }, []);
 
-  const processAudioQueue = () => {
-    if (audioQueue.current.length > 0 && !isProcessingAudio.current) {
-      isProcessingAudio.current = true;
-      const currentMessageChunks = audioQueue.current.shift();
-      const combinedBlob = new Blob(currentMessageChunks, { type: 'audio/mpeg' });
-      const audioUrl = URL.createObjectURL(combinedBlob);
-      setMessages(messages => [...messages, { id: messages.length + 1, audioUrl, user: { name: "GPT", avatar: "gpt", color: "maroon" } }]);
-      isProcessingAudio.current = false;
-      if (audioQueue.current.length > 0) {
-        processAudioQueue();
-      }
-    }
-  };
-  
-  function playNextAudioChunk() {
-    if (isPlaying || currentMessageAudioChunks.current.length === 0 || !isAudioEnabled) {
-      // Already playing or no chunks to play
-      return;
-    }
-  
-    setIsGptSpeaking(true);
-    isPlaying = true;
-  
-    const hasStreamComplete = currentMessageAudioChunks.current[currentMessageAudioChunks.current.length - 1] === "StreamComplete";
-    const audioBlobs = hasStreamComplete ? currentMessageAudioChunks.current.slice(0, -1) : [...currentMessageAudioChunks.current];
-    currentMessageAudioChunks.current = hasStreamComplete ? ["StreamComplete"] : [];
-  
-    if (audioBlobs.length === 0) {
-      setIsGptSpeaking(false);
-      isPlaying = false;
-      return;
-    }
-  
-    const combinedBlob = new Blob(audioBlobs, { type: 'audio/mpeg' });
-    const reader = new FileReader();
-    reader.onload = function() {
-      const arrayBuffer = this.result;
-      audioContext.decodeAudioData(arrayBuffer, playBuffer, errorHandler);
-    };
-    reader.readAsArrayBuffer(combinedBlob);
-  }
-  
-  
-  function playBuffer(audioBuffer) {
-    const source = audioContext.createBufferSource();
-    source.buffer = audioBuffer;
-    source.connect(audioContext.destination);
-    source.start();
-  
-    source.onended = () => {
-      isPlaying = false;
-      setIsGptSpeaking(false);
-      playNextAudioChunk(); // Play the next chunk if available
-    };
-  }
-  
-  function errorHandler(e) {
-    console.error("Error decoding audio data: " + e.err);
-    isPlaying = false;
-    setIsGptSpeaking(false);
-  }
-
   const receiveChatMessage = (message) => {
     if (message.transcription) {
       setMessages(messages => [...messages, {
@@ -173,41 +104,9 @@ const AudioChat = () => {
         user: { name: "GPT" }
       }]);
     } else if (message.stream) {
-      if (message.stream === "StreamComplete") {
-        isAudioStreaming = false;
-        audioQueue.current.push([...historyMessageAudioChunks.current]);
-        historyMessageAudioChunks.current = [];
-        historyMessageAudioChunks.current.push(message.stream);
-        if (!isProcessingAudio.current) {
-          // processAudioQueue();
-        }
-      } else {
-        if (!isAudioStreaming) {
-          isAudioStreaming = true;
-          historyMessageAudioChunks.current = [];
-        }
-
-        const audioBlob = base64ToBlob(message.stream, 'audio/mpeg');
-        currentMessageAudioChunks.current.push(audioBlob);
-        historyMessageAudioChunks.current.push(audioBlob);
-
-        if (isPlaying == false) {
-          playNextAudioChunk();
-        }
-      }
+      addAudioToQueue(message);
     }
   };
-  
-  const base64ToBlob = (base64, contentType) => {
-    const binaryString = window.atob(base64);
-    const byteNumbers = new Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      byteNumbers[i] = binaryString.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    return new Blob([byteArray], { type: contentType });
-  };
-
 
   const sendMessage = () => {
     play()
@@ -283,48 +182,8 @@ const AudioChat = () => {
           <IconButton style={{ color: '#3f6eb5', outline: 'none' }}><SettingsIcon /></IconButton>
         </div>
       </div>
-      <div className="search-ph">
-      <TextField
-      className="search-box"
-      variant="standard" 
-      placeholder="Search..."
-      InputProps={{
-        disableUnderline: true,
-        startAdornment: (
-          <InputAdornment position="start">
-            <SearchIcon />
-          </InputAdornment>
-        ),
-      }}
-    />
 
-  </div>
-  {/* Scrollable Assistant List */}
-  <div className="assistant-list">
-    <div className="assistant-tab active">
-    <div className="avatar"></div>
-      <div>
-        <span className="assistant-name">Pizzaa</span>
-        <div className="last-message">Last message...</div>
-      </div>
-    </div>
-    <div className="assistant-tab">
-    <div className="avatar"></div>
-      <div>
-        <span className="assistant-name">Bezeq Support</span>
-        <div className="last-message">Last message...</div>
-      </div>
-    </div>
-    <div className="assistant-tab">
-    <div className="avatar"></div>
-      <div>
-        <span className="assistant-name">Panda Support</span>
-        <div className="last-message">Last message...</div>
-      </div>
-    </div>
-    
-    {/* ... more assistant tabs ... */}
-  </div>
+      <Contacts />
 </div>
 
 
@@ -365,26 +224,9 @@ const AudioChat = () => {
         key={message.id}
         className={`message ${message.user.name === "rawhi" ? 'me' : 'other'}`}
       >
-      {message.user.name === "GPT" && message.id === messages.length && isGptSpeaking && !isOnCall && (
-        <div className="head">
-        <div className="eyebrow-container">
-          <div className="eyebrow">
-          </div>
-          <div className="eyebrow">
-          </div>
-        </div>
-        <div className="eyes-container">
-          <div className="eye">
-            <div className="pupil"></div>
-          </div>
-          <div className="eye">
-            <div className="pupil"></div>
-          </div>
-        </div>
-        <div className="nose"></div>
-        {isGptSpeaking ? <div className="mouth"></div> : <div className="nospeak-mouth"></div>}
-      </div>
-      )}
+        {message.user.name === "GPT" && message.id === messages.length && (
+          <GptFace isSpeaking={isGptSpeaking} isOnCall={isOnCall} />
+        )}
         <div className="text">
           {message.text}
           <span className={`message-time ${message.user.name === "rawhi" ? 'me' : 'other'}`}>10:15</span>

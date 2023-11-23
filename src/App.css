@@ -525,6 +525,10 @@ body {
   /* transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out; */
 }
 
+.round-button-inactive {
+  background-color: #d3d3d3;
+}
+
 .round-button-active {
   background-color: #000;
   color: white;
@@ -602,7 +606,7 @@ body {
 .wave {
   background: #3f6eb5;
   width: 4px;
-  height: 10px;
+  height: 20px;
   margin: 0 1px;
   border-radius: 2px;
 }
@@ -663,4 +667,17 @@ body {
 
 .mic-toggle-button:hover {
   background-color: rgba(0, 0, 0, 0.64); /* Lighter red on hover */
+}
+
+@keyframes fadeOutSimple {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.dialog-fade-out {
+  animation: fadeOutSimple 0.5s ease forwards;
 }

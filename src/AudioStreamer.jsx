@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import useSound from 'use-sound';
 import boopSfx from './interface-124464.mp3';
-import PhoneEnabledIcon from '@mui/icons-material/PhoneEnabled';
+import voicecall from './phone-call.mp3';
+import CallIcon from '@mui/icons-material/Call';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import PhoneDisabledIcon from '@mui/icons-material/PhoneDisabled';
 import Dialog from '@mui/material/Dialog';
@@ -9,15 +10,21 @@ import DialogContent from '@mui/material/DialogContent';
 import Avatar from '@mui/material/Avatar';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
+import CallEndIcon from '@mui/icons-material/CallEnd';
 
 const AudioStreamer = ({ onAudioStream, status, talkingStatus }) => {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [callTime, setCallTime] = useState(0);
   const callTimerRef = useRef(null);
-    const mediaRecorderRef = useRef(null);
-    const [play] = useSound(boopSfx);
-    const [isMicOn, setIsMicOn] = useState(true); // New state for managing microphone status
+  const mediaRecorderRef = useRef(null);
+  const [play] = useSound(boopSfx);
+  const [isMicOn, setIsMicOn] = useState(true);
+  const [isDialing, setIsDialing] = useState(false);
+  const [playDialingSound] = useSound(voicecall);
+  const numberOfRings = 1;
+  const dialingTimeoutRef = useRef(null); // Ref to store dialing timeouts
+  const [shouldShowDialog, setShouldShowDialog] = useState(false); // New state
 
     useEffect(() => {
       if (isStreaming) {
@@ -95,12 +102,32 @@ const AudioStreamer = ({ onAudioStream, status, talkingStatus }) => {
       };
   }, []);
 
-  const handleIconClick = () => {
-    if (status) {
-        setIsDialogOpen(true);
-        isStreaming ? stopStreaming() : startStreaming();
-    }
-};
+  const startDialing = () => {
+    setIsDialing(true);
+    playRingSound(1); // Start the first ring
+  };
+
+  const endDialingAndStartStreaming = () => {
+    setIsDialing(false); 
+    setIsDialogOpen(true);
+    startStreaming();
+  };
+
+  const playRingSound = (currentRing) => {
+      if (currentRing <= numberOfRings) {
+          let delay = 2500
+          if(currentRing == numberOfRings) {
+            delay = 1000
+          }
+          playDialingSound();
+          dialingTimeoutRef.current = setTimeout(() => {
+              playRingSound(currentRing + 1);
+          }, delay); // Adjust based on sound file duration
+      } else {
+          endDialingAndStartStreaming();
+      }
+  };
+
 
 const preventDialogClose = (event, reason) => {
     if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') {
@@ -109,9 +136,23 @@ const preventDialogClose = (event, reason) => {
 };
 
 const closeDialog = () => {
-  setIsDialogOpen(false);
-  if (isStreaming) {
-      stopStreaming();
+  document.getElementById('dialogContent').classList.add('dialog-fade-out');
+  setTimeout(() => {
+    setShouldShowDialog(false); // Immediately hide the dialog
+    setIsDialogOpen(false);
+    setIsDialing(false);
+    clearTimeout(dialingTimeoutRef.current);
+  
+    if (isStreaming) {
+        stopStreaming();
+    }
+  }, 500); // Timeout should match the animation duration
+};
+
+const handleIconClick = () => {
+  if (status) {
+      setShouldShowDialog(true); // Set to true when starting the process
+      startDialing();
   }
 };
 
@@ -122,44 +163,57 @@ const toggleMic = () => {
 
 return (
   <div>
-      <div 
-          onClick={handleIconClick}
-          className="round-button"
-          style={{
-              outline: "none", 
-              radius: "50%", 
-              cursor: status ? 'pointer' : 'default',
-              backgroundColor: !status || isStreaming ? '#d3d3d3' : '#3f6eb5' // Gray when inactive
-          }}
-      >
-          {isStreaming ? <PhoneDisabledIcon style={{ color: "red", minWidth: "40px" }} /> : <PhoneEnabledIcon />}
+    <div 
+        onClick={handleIconClick}
+        className={`round-button ${!status || isStreaming ? 'round-button-inactive' : ''}`}
+        style={{
+            outline: "none", 
+            borderRadius: "50%", 
+            cursor: status ? 'pointer' : 'default',
+            // backgroundColor removed
+        }}
+    >
+          {isStreaming ? <CallEndIcon style={{ color: "red", minWidth: "40px" }} /> : <CallIcon />}
       </div>
 
 
-<Dialog open={isDialogOpen} onClose={preventDialogClose}>
-      <DialogContent style={{ textAlign: 'center', padding: '20px', position: 'relative', width: "250px" }}>
-          <Avatar sx={{ bgcolor: "gray" }} style={{ width: "80px", height: "80px", margin: "auto" }} />
-          <p><b>PIZZZAAA</b></p>
-          <p>{formatCallTime()}</p>
+<Dialog id="dialogContent" open={shouldShowDialog} onClose={preventDialogClose}>
+    <DialogContent style={{ textAlign: 'center', padding: '20px', position: 'relative', width: "250px" }}>
+        {isDialing ? 
+            <>
+              <p>Calling PIZZZAAA...</p>
+              <div onClick={closeDialog} className="call-off-button">
+                  <CallEndIcon style={{ color: "white" }} />
+              </div>
+            </> : <></> }
+        {isStreaming ? 
+            <>
+            <Avatar sx={{ bgcolor: "gray" }} style={{ width: "80px", height: "80px", margin: "auto" }} />
+            <p><b>PIZZZAAA</b></p>
+            <p>{formatCallTime()}</p>
           <div className="audio-waves">
+            <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
+            <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
             <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
             <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
             <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
             <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
-                <div className="call-off-button">
-                    <PowerSettingsNewIcon onClick={closeDialog} style={{ color: "white" }} />
+                <div onClick={closeDialog} className="call-off-button">
+                    <CallEndIcon style={{ color: "white" }} />
                 </div>
-                <div className="mic-toggle-button">
+                <div onClick={toggleMic} className="mic-toggle-button">
                         {isMicOn ? 
-                            <MicOffIcon style={{ color: "white" }} onClick={toggleMic} /> : 
-                            <MicIcon style={{ color: "white" }} onClick={toggleMic} />
+                            <MicIcon style={{ color: "white" }} /> : 
+                            <MicOffIcon style={{ color: "white" }} />
                         }
                     </div>
             </div>
-        </DialogContent>
-    </Dialog>
+            </>: <></>
+          }
+          </DialogContent>
+        </Dialog>
     </div>
     );
 };
