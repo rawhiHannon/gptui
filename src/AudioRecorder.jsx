@@ -33,6 +33,9 @@ const AudioRecorder = ({ onRecordingComplete, status }) => {
   }, [isMouseDown]);
 
   const startRecording = async () => {
+    if(!status) {
+       return
+    }
     setIsMouseDown(true);
     play();
     try {
@@ -88,6 +91,8 @@ const AudioRecorder = ({ onRecordingComplete, status }) => {
         onMouseDown={startRecording} 
         onMouseUp={stopRecording}
         variant="contained"
+        disabled={!status}  // Disable the button if status is false
+
         style={{
           outline: "none",
         }}

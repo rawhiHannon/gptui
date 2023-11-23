@@ -593,9 +593,10 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 50px; /* Fixed height */
+  height: 20px; /* Fixed height */
   width: 100%; /* Full width */
   overflow: hidden; /* Hide any overflow */
+  margin-bottom: 20px;
 }
 
 .wave {
@@ -627,25 +628,39 @@ body {
   }
 }
 
-.call-off-button {
-  background-color: black;
+.PowerSettingsNewIcon {
+  color: red;
+  font-size: 40px;
+}
+
+.call-off-button, .mic-toggle-button {
+  background-color: red; /* Red background */
   border-radius: 50%;
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  width: 60px;
-  height: 60px;
+  width: 40px;  /* Increased size */
+  height: 40px; /* Increased size */
   cursor: pointer;
-  margin-top: 20px;
-  color: red;
-  transition: box-shadow 0.3s ease;
+  transition: background-color 0.3s ease; /* Smooth transition for background color */
 }
 
-.call-off-button:hover {
-  box-shadow: 0 0 15px red;
+.call-off-button:hover, .mic-toggle-button:hover {
+  background-color: #ff6666; /* Lighter red on hover */
 }
 
-.PowerSettingsNewIcon {
-  color: red;
-  font-size: 40px;
+.mic-toggle-button {
+  background-color: #000; /* Red background */
+  border-radius: 50%;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;  /* Increased size */
+  height: 40px; /* Increased size */
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* Smooth transition for background color */
+}
+
+.mic-toggle-button:hover {
+  background-color: rgba(0, 0, 0, 0.64); /* Lighter red on hover */
 }
