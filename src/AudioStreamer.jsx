@@ -11,10 +11,12 @@ import Avatar from '@mui/material/Avatar';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import CallEndIcon from '@mui/icons-material/CallEnd';
+import { Mic, Phone } from '@mui/icons-material';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 
-const AudioStreamer = ({ onAudioStream, status, talkingStatus }) => {
+const AudioStreamer = ({ onAudioStream, toggleAudio, status, talkingStatus, isAudioEnabled }) => {
   const [isStreaming, setIsStreaming] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [callTime, setCallTime] = useState(0);
   const callTimerRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -25,6 +27,7 @@ const AudioStreamer = ({ onAudioStream, status, talkingStatus }) => {
   const numberOfRings = 1;
   const dialingTimeoutRef = useRef(null); // Ref to store dialing timeouts
   const [shouldShowDialog, setShouldShowDialog] = useState(false); // New state
+  let callManuallyTerminated = false;
 
     useEffect(() => {
       if (isStreaming) {
@@ -68,7 +71,6 @@ const AudioStreamer = ({ onAudioStream, status, talkingStatus }) => {
 
     const startStreaming = async () => {
         play();
-        onAudioStream("start");
         setIsStreaming(true);
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -79,16 +81,14 @@ const AudioStreamer = ({ onAudioStream, status, talkingStatus }) => {
             mediaRecorder.start(250); // Start recording and generate data every 250ms
         } catch (err) {
             console.error('Error accessing audio:', err);
-            setIsStreaming(false);
+            closeDialog()
         }
     };
 
     const stopStreaming = () => {
       if (mediaRecorderRef.current) {
-          mediaRecorderRef.current.onstop = () => {
-              onAudioStream("CloseStream"); // Indicate to close the stream
-              setIsStreaming(false);
-          };
+          onAudioStream("CloseStream");
+          setIsStreaming(false);
           mediaRecorderRef.current.stop();
       }
   };
@@ -104,13 +104,16 @@ const AudioStreamer = ({ onAudioStream, status, talkingStatus }) => {
 
   const startDialing = () => {
     setIsDialing(true);
-    playRingSound(1); // Start the first ring
+    callManuallyTerminated = false;
+    onAudioStream("start");
+    playRingSound(1);
   };
 
   const endDialingAndStartStreaming = () => {
-    setIsDialing(false); 
-    setIsDialogOpen(true);
-    startStreaming();
+    if (!callManuallyTerminated) {
+      setIsDialing(false); 
+      startStreaming();
+    }
   };
 
   const playRingSound = (currentRing) => {
@@ -129,24 +132,21 @@ const AudioStreamer = ({ onAudioStream, status, talkingStatus }) => {
   };
 
 
-const preventDialogClose = (event, reason) => {
-    if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') {
-        closeDialog();
-    }
+const closeDialog = () => {
+  callManuallyTerminated = true;
+  document.getElementById('dialogContent').classList.add('dialog-fade-out');
+  if (isStreaming) {
+    stopStreaming();
+  }
+  setShouldShowDialog(false);
+  setIsDialing(false);
+  clearTimeout(dialingTimeoutRef.current);
 };
 
-const closeDialog = () => {
-  document.getElementById('dialogContent').classList.add('dialog-fade-out');
-  setTimeout(() => {
-    setShouldShowDialog(false); // Immediately hide the dialog
-    setIsDialogOpen(false);
-    setIsDialing(false);
-    clearTimeout(dialingTimeoutRef.current);
-  
-    if (isStreaming) {
-        stopStreaming();
-    }
-  }, 500); // Timeout should match the animation duration
+const preventDialogClose = (event, reason) => {
+  if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') {
+      closeDialog();
+  }
 };
 
 const handleIconClick = () => {
@@ -165,7 +165,7 @@ return (
   <div>
     <div 
         onClick={handleIconClick}
-        className={`round-button ${!status || isStreaming ? 'round-button-inactive' : ''}`}
+        className={`${!status || isStreaming ? 'round-button-inactive' : 'round-button'}`}
         style={{
             outline: "none", 
             borderRadius: "50%", 
@@ -203,12 +203,19 @@ return (
                 <div onClick={closeDialog} className="call-off-button">
                     <CallEndIcon style={{ color: "white" }} />
                 </div>
-                <div onClick={toggleMic} className="mic-toggle-button">
+                <div onClick={closeDialog} className="toggle-button">
+                    {isAudioEnabled ? (
+                      <VolumeUpIcon style={{ color: "white" }} onClick={toggleAudio} />
+                    ) : (
+                      <VolumeOffIcon style={{ color: "white" }} onClick={toggleAudio} />
+                    )}
+                </div>
+                <div onClick={toggleMic} className="toggle-button">
                         {isMicOn ? 
                             <MicIcon style={{ color: "white" }} /> : 
                             <MicOffIcon style={{ color: "white" }} />
                         }
-                    </div>
+                </div>
             </div>
             </>: <></>
           }

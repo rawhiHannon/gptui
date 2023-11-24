@@ -527,6 +527,20 @@ body {
 
 .round-button-inactive {
   background-color: #d3d3d3;
+  color: white;
+  margin: 2px;
+  margin-left: 5px;
+  margin-right: 5px;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  height: 39px;
+  border-radius: 50%;
+  min-width: 0;
+  width: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .round-button-active {
@@ -545,8 +559,6 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  /* Optional: Uncomment to add transition effect */
-  /* transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out; */
 }
 
 
@@ -637,7 +649,7 @@ body {
   font-size: 40px;
 }
 
-.call-off-button, .mic-toggle-button {
+.call-off-button {
   background-color: red; /* Red background */
   border-radius: 50%;
   display: inline-flex;
@@ -649,11 +661,11 @@ body {
   transition: background-color 0.3s ease; /* Smooth transition for background color */
 }
 
-.call-off-button:hover, .mic-toggle-button:hover {
+.call-off-button:hover {
   background-color: #ff6666; /* Lighter red on hover */
 }
 
-.mic-toggle-button {
+.toggle-button {
   background-color: #000; /* Red background */
   border-radius: 50%;
   display: inline-flex;
@@ -665,7 +677,7 @@ body {
   transition: background-color 0.3s ease; /* Smooth transition for background color */
 }
 
-.mic-toggle-button:hover {
+.toggle-button:hover {
   background-color: rgba(0, 0, 0, 0.64); /* Lighter red on hover */
 }
 

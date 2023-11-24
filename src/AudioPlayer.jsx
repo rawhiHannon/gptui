@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-const useAudioPlayer = (onGptSpeakingChange, isAudioEnabled) => {
+const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
   const audioQueue = useRef([]);
   const currentMessageAudioChunks = useRef([]);
   const historyMessageAudioChunks = useRef([]);
@@ -8,7 +8,8 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabled) => {
   const [isGptSpeaking, setIsGptSpeaking] = useState(false);
   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
   const isPlaying = useRef(false);
-  let isAudioStreaming = false;  
+  let isAudioStreaming = false;
+  const sourceRef = useRef(null); // Reference to the current audio source
 
   useEffect(() => {
     if (!isPlaying.current) {
@@ -73,7 +74,8 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabled) => {
     source.buffer = audioBuffer;
     source.connect(audioContext.destination);
     source.start();
-  
+    sourceRef.current = source; // Keep a reference to the current source
+
     source.onended = () => {
       isPlaying.current = false;
       setIsGptSpeaking(false);
@@ -81,6 +83,29 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabled) => {
     };
   }
   
+  const stop = () => {
+    // Stop the current audio source if it's playing
+    if (sourceRef.current) {
+      sourceRef.current.stop();
+      sourceRef.current = null;
+    }
+
+    // Clear the audio queues
+    audioQueue.current = [];
+    currentMessageAudioChunks.current = [];
+    historyMessageAudioChunks.current = [];
+
+    // Reset states
+    isPlaying.current = false;
+    isProcessingAudio.current = false;
+    setIsGptSpeaking(false);
+
+    if (onGptSpeakingChange) {
+      onGptSpeakingChange(false);
+    }
+  };
+
+
   function errorHandler(e) {
     console.error("Error decoding audio data: " + e.err);
     isPlaying.current = false;
@@ -97,22 +122,25 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabled) => {
     return new Blob([byteArray], { type: contentType });
   };
 
-  const addAudioToQueue  = (message) => {
-    if (message.stream === "StreamComplete") {
+  const addAudioToQueue  = (stream) => {
+    if (stream === "StreamComplete") {
         isAudioStreaming = false;
         audioQueue.current.push([...historyMessageAudioChunks.current]);
         historyMessageAudioChunks.current = [];
-        historyMessageAudioChunks.current.push(message.stream);
+        historyMessageAudioChunks.current.push(stream);
         if (!isProcessingAudio.current) {
           // processAudioQueue();
         }
       } else {
+        if(!isAudioEnabledRef.current) {
+          return
+        }
         if (!isAudioStreaming) {
           isAudioStreaming = true;
           historyMessageAudioChunks.current = [];
         }
 
-        const audioBlob = base64ToBlob(message.stream, 'audio/mpeg');
+        const audioBlob = base64ToBlob(stream, 'audio/mpeg');
         currentMessageAudioChunks.current.push(audioBlob);
         historyMessageAudioChunks.current.push(audioBlob);
 
@@ -124,6 +152,7 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabled) => {
   
   return {
     addAudioToQueue,
+    stop
   };
 };
 

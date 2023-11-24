@@ -6,13 +6,9 @@ import Avatar from '@mui/material/Avatar';
 import useSound from 'use-sound';
 import boopSfx from './interface-124464.mp3';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import ArchiveIcon from '@mui/icons-material/Archive';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import IconButton from '@mui/material/IconButton';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import SettingsIcon from '@mui/icons-material/Settings';
-import AddIcon from '@mui/icons-material/Add';
 import AudioRecorder from './AudioRecorder';
 import SpeechRecognition from './SpeechRecognition'
 import AudioStreamer from "./AudioStreamer";
@@ -34,6 +30,8 @@ const AudioChat = () => {
   const menuRef = useRef(null);
   const [isGptSpeaking, setIsGptSpeaking] = useState(false);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
+  const isAudioEnabledRef = useRef(false);
+  const lastMessageTimeRef = useRef(new Date());
 
   const handleGptSpeakingChange = (isSpeaking) => {
     setIsGptSpeaking(isSpeaking);
@@ -41,7 +39,14 @@ const AudioChat = () => {
 
   const {
     addAudioToQueue,
-  } = useAudioPlayer(handleGptSpeakingChange, isAudioEnabled);
+    stop
+  } = useAudioPlayer(handleGptSpeakingChange, isAudioEnabledRef);
+
+  useEffect(() => {
+    const audioSetting = localStorage.getItem("audio") === "true";
+    isAudioEnabledRef.current = audioSetting
+    setIsAudioEnabled(audioSetting);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -90,35 +95,55 @@ const AudioChat = () => {
     }
   }, []);
 
+  const getLastMessageFromRawhi = (messages) => {
+    // Find the last message where the user's name is "rawhi"
+    const lastRawhiMessage = messages.slice().reverse().find(message => message.user.name === "rawhi");
+    return lastRawhiMessage || null;
+};
+
   const receiveChatMessage = (message) => {
     if (message.transcription) {
+      const now = new Date();
+      const msElapsed = now.getTime() - lastMessageTimeRef.current.getTime();
       setMessages(messages => [...messages, {
         id: messages.length + 1,
         text: message.transcription,
-        user: { name: "rawhi" }
+        user: { name: "rawhi" },
+        timestamp: now,
+        ms: msElapsed
       }]);
     } else if (message.text) {
+      const now = new Date();
+      const msElapsed = now.getTime() - lastMessageTimeRef.current.getTime();
       setMessages(messages => [...messages, {
         id: messages.length + 1,
         text: message.text,
-        user: { name: "GPT" }
+        user: { name: "GPT" },
+        timestamp: now,
+        ms: msElapsed
       }]);
     } else if (message.stream) {
-      addAudioToQueue(message);
+      if(isAudioEnabledRef.current) {
+        addAudioToQueue(message.stream);
+      }
     }
   };
 
   const sendMessage = () => {
-    play()
+    play();
+    const timestamp = new Date(); // Get the current timestamp
+    lastMessageTimeRef.current = timestamp
     let msg = { 
       id: messages.length + 1, 
       text, 
-      user: { name: "rawhi", avatar: "r", color: "green" } 
+      user: { name: "rawhi", avatar: "r", color: "green" },
+      timestamp: timestamp,
+      ms: 0  // Milliseconds elapsed since sending
     };
     Manager.send(msg.text);
     setMessages([...messages, msg]);
     setText("");
-  };
+};
 
   const sendTextMessage = (textData) => {
     play()
@@ -130,6 +155,10 @@ const AudioChat = () => {
     Manager.send(newMessage.text);
     setMessages(messages => [...messages, newMessage]); // Update this line
     setText("");
+  };
+
+  const formatTime = (timestamp) => {
+    return timestamp.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
   };
 
   const handleKeyDown = (e) => {
@@ -150,7 +179,10 @@ const AudioChat = () => {
 
   const toggleAudio = (event) => {
     event.stopPropagation();
-    setIsAudioEnabled(!isAudioEnabled);
+    isAudioEnabledRef.current = !isAudioEnabledRef.current
+    stop();
+    setIsAudioEnabled(isAudioEnabledRef.current);
+    localStorage.setItem("audio", ""+isAudioEnabledRef.current)
   };
 
   const handleAudioStream = (base64audio) => {
@@ -158,33 +190,25 @@ const AudioChat = () => {
       setOnCall(true)
     }
     if(base64audio === "CloseStream") {
+      stop()
       setOnCall(false)
     }
     Manager.sendStream(base64audio)
   };
 
   const handleAudio = (base64audio, blob) => {
+    lastMessageTimeRef.current = new Date()
     Manager.sendVoice(base64audio)
   }
 
   return (
     <div>
 
-    <div className="chat-container">
+  <div className="chat-container">
   
     <div className="sidebar">
-      <div className="sidebar-header">
-        <Avatar sx={{ bgcolor: "gray" }} style={{ width: "40px", height: "40px", marginRight: "10px" }} />
-    
-        <div className="header-icons">
-          <IconButton style={{ color: '#3f6eb5', outline: 'none' }}><ArchiveIcon /></IconButton>
-          <IconButton style={{ color: '#3f6eb5', outline: 'none' }}><PersonAddIcon /></IconButton>
-          <IconButton style={{ color: '#3f6eb5', outline: 'none' }}><SettingsIcon /></IconButton>
-        </div>
-      </div>
-
       <Contacts />
-</div>
+    </div>
 
 
   <div className="chat">
@@ -197,7 +221,7 @@ const AudioChat = () => {
       {isOnline && <p>Online</p>}
     </div>
     <div className="icon-container">
-    <AudioStreamer status={isOnline} onAudioStream={handleAudioStream} talkingStatus={isGptSpeaking} />
+    <AudioStreamer status={isOnline} onAudioStream={handleAudioStream} toggleAudio={toggleAudio} talkingStatus={isGptSpeaking} isAudioEnabled={isAudioEnabled} />
 
     <div className="speaker-icon-container">
 
@@ -225,11 +249,13 @@ const AudioChat = () => {
         className={`message ${message.user.name === "rawhi" ? 'me' : 'other'}`}
       >
         {message.user.name === "GPT" && message.id === messages.length && (
-          <GptFace isSpeaking={isGptSpeaking} isOnCall={isOnCall} />
+          <GptFace isSpeaking={isGptSpeaking && isAudioEnabled} isOnCall={isOnCall} />
         )}
         <div className="text">
           {message.text}
-          <span className={`message-time ${message.user.name === "rawhi" ? 'me' : 'other'}`}>10:15</span>
+          <span className={`message-time ${message.user.name === "rawhi" ? 'me' : 'other'}`}>
+            {formatTime(new Date(message.timestamp))} ({message.ms} MS)
+          </span>
         </div>
       </div>
     ))}
