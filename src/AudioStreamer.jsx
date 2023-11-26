@@ -15,7 +15,7 @@ import { Mic, Phone } from '@mui/icons-material';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 
-const AudioStreamer = ({ onAudioStream, toggleAudio, status, talkingStatus, isAudioEnabled }) => {
+const AudioStreamer = ({ onAudioStream, onStreamStarted, toggleAudio, status, talkingStatus, isAudioEnabled }) => {
   const [isStreaming, setIsStreaming] = useState(false);
   const [callTime, setCallTime] = useState(0);
   const callTimerRef = useRef(null);
@@ -24,7 +24,7 @@ const AudioStreamer = ({ onAudioStream, toggleAudio, status, talkingStatus, isAu
   const [isMicOn, setIsMicOn] = useState(true);
   const [isDialing, setIsDialing] = useState(false);
   const [playDialingSound] = useSound(voicecall);
-  const numberOfRings = 1;
+  const numberOfRings = 2;
   const dialingTimeoutRef = useRef(null); // Ref to store dialing timeouts
   const [shouldShowDialog, setShouldShowDialog] = useState(false); // New state
   let callManuallyTerminated = false;
@@ -70,6 +70,9 @@ const AudioStreamer = ({ onAudioStream, toggleAudio, status, talkingStatus, isAu
     };
 
     const startStreaming = async () => {
+        if(onStreamStarted) {
+            onStreamStarted()
+        }
         play();
         setIsStreaming(true);
         try {
@@ -81,7 +84,7 @@ const AudioStreamer = ({ onAudioStream, toggleAudio, status, talkingStatus, isAu
             mediaRecorder.start(250); // Start recording and generate data every 250ms
         } catch (err) {
             console.error('Error accessing audio:', err);
-            closeDialog()
+            closeDialog();
         }
     };
 
@@ -200,9 +203,6 @@ return (
             <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
-                <div onClick={closeDialog} className="call-off-button">
-                    <CallEndIcon style={{ color: "white" }} />
-                </div>
                 <div onClick={closeDialog} className="toggle-button">
                     {isAudioEnabled ? (
                       <VolumeUpIcon style={{ color: "white" }} onClick={toggleAudio} />
@@ -215,6 +215,9 @@ return (
                             <MicIcon style={{ color: "white" }} /> : 
                             <MicOffIcon style={{ color: "white" }} />
                         }
+                </div>
+                <div onClick={closeDialog} className="call-off-button">
+                    <CallEndIcon style={{ color: "white" }} />
                 </div>
             </div>
             </>: <></>

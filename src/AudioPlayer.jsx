@@ -10,6 +10,7 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
   const isPlaying = useRef(false);
   let isAudioStreaming = false;
   const sourceRef = useRef(null); // Reference to the current audio source
+  const isPaused = useRef(false); // New state to track if the audio is paused
 
   useEffect(() => {
     if (!isPlaying.current) {
@@ -27,6 +28,18 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
     }
   }, [isGptSpeaking, onGptSpeakingChange]);
   
+  const pauseAudio = () => {
+    isPaused.current = true;
+  };
+
+  const playAudio = () => {
+    if (isPaused.current && currentMessageAudioChunks.current.length > 0) {
+      isPaused.current = false;
+      playNextAudioChunk();
+    }
+  };
+
+
   const processAudioQueue = () => {
     if (audioQueue.current.length > 0 && !isProcessingAudio.current) {
       isProcessingAudio.current = true;
@@ -42,7 +55,7 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
   };
   
   function playNextAudioChunk() {
-    if (isPlaying.current || currentMessageAudioChunks.current.length === 0) {
+    if (isPlaying.current || currentMessageAudioChunks.current.length === 0 || isPaused.current) {
       return;
     }
   
@@ -152,7 +165,9 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
   
   return {
     addAudioToQueue,
-    stop
+    stop,
+    pauseAudio,
+    playAudio
   };
 };
 

@@ -39,7 +39,9 @@ const AudioChat = () => {
 
   const {
     addAudioToQueue,
-    stop
+    stop,
+    pauseAudio,
+    playAudio,
   } = useAudioPlayer(handleGptSpeakingChange, isAudioEnabledRef);
 
   useEffect(() => {
@@ -94,12 +96,6 @@ const AudioChat = () => {
       setMessages(JSON.parse(storedMessages));
     }
   }, []);
-
-  const getLastMessageFromRawhi = (messages) => {
-    // Find the last message where the user's name is "rawhi"
-    const lastRawhiMessage = messages.slice().reverse().find(message => message.user.name === "rawhi");
-    return lastRawhiMessage || null;
-};
 
   const receiveChatMessage = (message) => {
     if (message.transcription) {
@@ -187,6 +183,7 @@ const AudioChat = () => {
 
   const handleAudioStream = (base64audio) => {
     if(base64audio === "start") {
+      pauseAudio();
       setOnCall(true)
     }
     if(base64audio === "CloseStream") {
@@ -195,6 +192,12 @@ const AudioChat = () => {
     }
     Manager.sendStream(base64audio)
   };
+
+  const handleStreamStarted = () => {
+    setTimeout(() => {
+      playAudio();
+    }, 1300);
+  }
 
   const handleAudio = (base64audio, blob) => {
     lastMessageTimeRef.current = new Date()
@@ -221,7 +224,14 @@ const AudioChat = () => {
       {isOnline && <p>Online</p>}
     </div>
     <div className="icon-container">
-    <AudioStreamer status={isOnline} onAudioStream={handleAudioStream} toggleAudio={toggleAudio} talkingStatus={isGptSpeaking} isAudioEnabled={isAudioEnabled} />
+    <AudioStreamer 
+      status={isOnline} 
+      onAudioStream={handleAudioStream} 
+      onStreamStarted={handleStreamStarted}
+      toggleAudio={toggleAudio} 
+      talkingStatus={isGptSpeaking} 
+      isAudioEnabled={isAudioEnabled} 
+    />
 
     <div className="speaker-icon-container">
 
