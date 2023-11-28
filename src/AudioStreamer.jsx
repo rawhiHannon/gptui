@@ -180,8 +180,8 @@ return (
       </div>
 
 
-<Dialog id="dialogContent" open={shouldShowDialog} onClose={preventDialogClose}>
-    <DialogContent style={{ textAlign: 'center', padding: '20px', position: 'relative', width: "250px" }}>
+<Dialog id="dialogContent" open={shouldShowDialog} onClose={preventDialogClose} className="call-dialog">
+    <DialogContent style={{ textAlign: 'center', padding: '20px', position: 'relative', width: "250px" }} className="call-dialog-content">
         {isDialing ? 
             <>
               <p>Calling PIZZZAAA...</p>
@@ -193,7 +193,6 @@ return (
             <>
             <Avatar sx={{ bgcolor: "gray" }} style={{ width: "80px", height: "80px", margin: "auto" }} />
             <p><b>PIZZZAAA</b></p>
-            <p>{formatCallTime()}</p>
           <div className="audio-waves">
             <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
             <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
@@ -202,15 +201,16 @@ return (
             <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
             <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
-                <div onClick={closeDialog} className="toggle-button">
+            <p>{formatCallTime()}</p>
+            <div className='buttons-holder' style={{ gap: '20px' }}>
+                <div onClick={closeDialog} className="toggle-button-raw">
                     {isAudioEnabled ? (
                       <VolumeUpIcon style={{ color: "white" }} onClick={toggleAudio} />
                     ) : (
                       <VolumeOffIcon style={{ color: "white" }} onClick={toggleAudio} />
                     )}
                 </div>
-                <div onClick={toggleMic} className="toggle-button">
+                <div onClick={toggleMic} className="toggle-button-raw">
                         {isMicOn ? 
                             <MicIcon style={{ color: "white" }} /> : 
                             <MicOffIcon style={{ color: "white" }} />

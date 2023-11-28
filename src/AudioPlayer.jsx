@@ -9,8 +9,8 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
   const isPlaying = useRef(false);
   let isAudioStreaming = false;
-  const sourceRef = useRef(null); // Reference to the current audio source
-  const isPaused = useRef(false); // New state to track if the audio is paused
+  const sourceRef = useRef(null);
+  const isPaused = useRef(false);
 
   useEffect(() => {
     if (!isPlaying.current) {

@@ -171,6 +171,7 @@ const AudioChat = () => {
     setMessages([]);
     localStorage.removeItem('messages');
     setShowMenu(false);
+    lastMessageTimeRef.current = new Date()
   };
 
   const toggleAudio = (event) => {
@@ -279,6 +280,7 @@ const AudioChat = () => {
           onChange={e => setText(e.target.value)}
           placeholder="Type a message"
           onKeyDown={handleKeyDown}
+          disabled={!isOnline}
         />
         {
           text

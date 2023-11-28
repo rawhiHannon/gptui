@@ -8,55 +8,39 @@ import boopSfx from './interface-124464.mp3';
 const SpeechRecognition = ({ onSpeechText }) => {
   const [play] = useSound(boopSfx);
   const [isMouseDown, setIsMouseDown] = useState(false);
-  const [hasSpeechEnded, setHasSpeechEnded] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const speechRecognitionRef = useRef(null);
   const transcriptAccumulator = useRef("");
 
   useEffect(() => {
-    // Add global mouseup event listener
-    const handleGlobalMouseUp = () => {
-      if (isMouseDown) {
-        setIsRecording(false); // Stop recording when mouse is released
-        setIsMouseDown(false);
-        if (hasSpeechEnded && transcriptAccumulator.current.trim().length > 0) {
-          if(handleSpeechText) {
-            handleSpeechText(transcriptAccumulator.current)
-          }
-          transcriptAccumulator.current = "";
-        }
-      }
-    };
-
     window.addEventListener('mouseup', handleGlobalMouseUp);
-
     return () => {
       window.removeEventListener('mouseup', handleGlobalMouseUp);
     };
   }, [isMouseDown]);
 
-  // Initialize Speech Recognition
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       speechRecognitionRef.current = new SpeechRecognition();
-      speechRecognitionRef.current.continuous = false;
+      speechRecognitionRef.current.continuous = true;  // Changed to true for continuous recognition
       speechRecognitionRef.current.lang = 'en-US';
-      speechRecognitionRef.current.interimResults = false;
+      speechRecognitionRef.current.interimResults = true;  // Changed to true for real-time interim results
 
       speechRecognitionRef.current.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        transcriptAccumulator.current += transcript; // Accumulate transcript
+        const interimTranscript = Array.from(event.results)
+          .map(result => result[0].transcript)
+          .join('');
+        transcriptAccumulator.current = interimTranscript;
+        onSpeechText(interimTranscript);  // Call onSpeechText for real-time update
       };
 
       speechRecognitionRef.current.onend = () => {
-        setHasSpeechEnded(true);
-        if (!isMouseDown && transcriptAccumulator.current.trim().length > 0) {
-          if(onSpeechText) {
-            onSpeechText(transcriptAccumulator.current);
-          }
-          transcriptAccumulator.current = "";
+        setIsRecording(false);
+        if (transcriptAccumulator.current.trim().length > 0) {
+          onSpeechText(transcriptAccumulator.current);
         }
+        transcriptAccumulator.current = "";
       };
 
       speechRecognitionRef.current.onerror = (event) => {
@@ -68,11 +52,22 @@ const SpeechRecognition = ({ onSpeechText }) => {
   }, []);
 
   const startRecording = () => {
-    play()
-    setIsRecording(true);
-    transcriptAccumulator.current = "";  // Clear accumulator
+    play();
     setIsMouseDown(true);
-    speechRecognitionRef.current.start();
+    if (!isRecording) {
+      setIsRecording(true);
+      transcriptAccumulator.current = "";  // Clear accumulator
+      speechRecognitionRef.current.start();
+    }
+  };
+
+  const handleGlobalMouseUp = () => {
+    if (isMouseDown) {
+      setIsMouseDown(false);
+      if (isRecording) {
+        speechRecognitionRef.current.stop();
+      }
+    }
   };
 
   return (

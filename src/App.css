@@ -467,8 +467,6 @@ body {
   border-right: 0px;
   /* border-top: 0px; */
   border-bottom: 1px solid #e0e0e0;
-  padding-top: 2px;
-  padding-bottom: 2px;
   background-color: rgb(245, 242, 242);
   background-color: #fff;
 }
@@ -526,8 +524,8 @@ body {
 }
 
 .round-button-inactive {
-  background-color: #d3d3d3;
-  color: white;
+  background-color: rgba(204, 204, 204, 0.52);
+  color: rgb(171, 171, 171);
   margin: 2px;
   margin-left: 5px;
   margin-right: 5px;
@@ -577,16 +575,17 @@ body {
 ::-webkit-scrollbar-track {
   -webkit-border-radius: 0px;
   border-radius: 0px;
+  /* margin-bottom: -1px; */
 }
 
 ::-webkit-scrollbar-thumb {
   -webkit-border-radius: 0px;
   border-radius: 0px;
-  background: #333f80;
+  background: #656566d4;
 }
 
 ::-webkit-scrollbar-thumb:window-inactive {
-  background: #333f80;
+  background: #656566d4;
 }
 
 .scroll-box {
@@ -692,4 +691,36 @@ body {
 
 .dialog-fade-out {
   animation: fadeOutSimple 0.5s ease forwards;
+}
+
+
+.buttons-holder {
+  display: inline-flex;
+  justify-content: 'center';
+  align-items: 'center';
+  background-color: rgba(0, 0, 0, 0.895);
+  padding: 10px;
+  padding-left: 20px;
+  border-radius: 15px;
+  margin-top: 0px;
+}
+
+.toggle-button-raw {
+  /* background-color: rgba(0, 0, 0, 0.895); */
+  border-radius: 50%;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* Smooth transition for background color */
+}
+
+.call-dialog {
+    border-radius: 30px;
+}
+
+.call-dialog-content {
+  /* border: 2px solid #3f6eb5; */
+  background: linear-gradient(to bottom, #fff 80%, #ccc 20%, #ccc 40%, #fff 80%);
+  /* border-radius: 30px; */
 }
