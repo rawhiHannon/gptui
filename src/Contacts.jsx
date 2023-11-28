@@ -44,7 +44,7 @@ const Contacts = () => {
     <div className="assistant-tab active">
     <div className="avatar"></div>
       <div>
-        <span className="assistant-name">Pizzaa</span>
+        <span className="assistant-name">Panda</span>
         <div className="last-message">Last message...</div>
       </div>
     </div>
@@ -52,13 +52,6 @@ const Contacts = () => {
     <div className="avatar"></div>
       <div>
         <span className="assistant-name">Bezeq Support</span>
-        <div className="last-message">Last message...</div>
-      </div>
-    </div>
-    <div className="assistant-tab">
-    <div className="avatar"></div>
-      <div>
-        <span className="assistant-name">Panda Support</span>
         <div className="last-message">Last message...</div>
       </div>
     </div>
