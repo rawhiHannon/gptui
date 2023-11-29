@@ -136,6 +136,11 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
   };
 
   const addAudioToQueue  = (stream) => {
+    if (stream === "<CANCEL>") {
+      stop();
+      // alert("stop")x
+      return;
+    }
     if (stream === "StreamComplete") {
         isAudioStreaming = false;
         audioQueue.current.push([...historyMessageAudioChunks.current]);

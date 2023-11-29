@@ -192,8 +192,8 @@ return (
         {isStreaming ? 
             <>
             <Avatar sx={{ bgcolor: "gray" }} style={{ width: "80px", height: "80px", margin: "auto" }} />
-            <p><b>Panda</b></p>
-          <div className="audio-waves">
+            <h2><p><b>Panda</b></p></h2>
+          <div className="audio-waves" style={{}}>
             <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
             <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
             <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
@@ -205,19 +205,19 @@ return (
             <div className='buttons-holder' style={{ gap: '20px' }}>
                 <div onClick={closeDialog} className="toggle-button-raw">
                     {isAudioEnabled ? (
-                      <VolumeUpIcon style={{ color: "white" }} onClick={toggleAudio} />
+                      <VolumeUpIcon style={{ color: "white", width: "45px", height: "45px" }} onClick={toggleAudio} />
                     ) : (
-                      <VolumeOffIcon style={{ color: "white" }} onClick={toggleAudio} />
+                      <VolumeOffIcon style={{ color: "white", width: "45px", height: "45px" }} onClick={toggleAudio} />
                     )}
                 </div>
                 <div onClick={toggleMic} className="toggle-button-raw">
                         {isMicOn ? 
-                            <MicIcon style={{ color: "white" }} /> : 
-                            <MicOffIcon style={{ color: "white" }} />
+                            <MicIcon style={{ color: "white", width: "45px", height: "45px" }} /> : 
+                            <MicOffIcon style={{ color: "white", width: "45px", height: "45px" }} />
                         }
                 </div>
-                <div onClick={closeDialog} className="call-off-button">
-                    <CallEndIcon style={{ color: "white" }} />
+                <div onClick={closeDialog} className="call-off-button" style={{ width: "45px", height: "45px" }}>
+                    <CallEndIcon style={{ color: "white", fontSize: "25px" }} />
                 </div>
             </div>
             </>: <></>
