@@ -184,15 +184,16 @@ return (
     <DialogContent style={{ textAlign: 'center', padding: '20px', position: 'relative', width: "250px" }} className="call-dialog-content">
         {isDialing ? 
             <>
-              <p>Calling Panda...</p>
+              <p style={{ color: "white" }}>Calling Panda...</p>
               <div onClick={closeDialog} className="call-off-button">
                   <CallEndIcon style={{ color: "white" }} />
               </div>
             </> : <></> }
         {isStreaming ? 
             <>
-            <Avatar sx={{ bgcolor: "gray" }} style={{ width: "80px", height: "80px", margin: "auto" }} />
-            <h2><p><b>Panda</b></p></h2>
+            <Avatar sx={{ bgcolor: "gray" }} style={{ width: "80px", height: "80px", margin: "auto", borderColor: "#fff" }} />
+            <div style={{color: "#fff", marginBottom: "0px", marginTop: "5px", fontSize: "25px"}}><b>Panda</b></div>
+            <div style={{color: "#fff", marginBottom: "25px"}}>{formatCallTime()}</div>
           <div className="audio-waves" style={{}}>
             <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
             <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
@@ -200,24 +201,27 @@ return (
             <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
             <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
             <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
+            <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
+            <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
+            <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
             </div>
-            <p>{formatCallTime()}</p>
-            <div className='buttons-holder' style={{ gap: '20px' }}>
+            
+            <div className='buttons-holder' style={{ gap: '15px' }}>
                 <div onClick={closeDialog} className="toggle-button-raw">
                     {isAudioEnabled ? (
-                      <VolumeUpIcon style={{ color: "white", width: "45px", height: "45px" }} onClick={toggleAudio} />
+                      <VolumeUpIcon style={{ color: "white", width: "25px", height: "25px" }} onClick={toggleAudio} />
                     ) : (
-                      <VolumeOffIcon style={{ color: "white", width: "45px", height: "45px" }} onClick={toggleAudio} />
+                      <VolumeOffIcon style={{ color: "white", width: "25px", height: "25px" }} onClick={toggleAudio} />
                     )}
                 </div>
                 <div onClick={toggleMic} className="toggle-button-raw">
                         {isMicOn ? 
-                            <MicIcon style={{ color: "white", width: "45px", height: "45px" }} /> : 
-                            <MicOffIcon style={{ color: "white", width: "45px", height: "45px" }} />
+                            <MicIcon style={{ color: "white", width: "25px", height: "25px" }} /> : 
+                            <MicOffIcon style={{ color: "white", width: "25px", height: "25px" }} />
                         }
                 </div>
-                <div onClick={closeDialog} className="call-off-button" style={{ width: "45px", height: "45px" }}>
-                    <CallEndIcon style={{ color: "white", fontSize: "25px" }} />
+                <div onClick={closeDialog} className="call-off-button" style={{ width: "30px", height: "30px" }}>
+                    <CallEndIcon style={{ color: "white", fontSize: "20px" }} />
                 </div>
             </div>
             </>: <></>

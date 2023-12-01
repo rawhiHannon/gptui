@@ -715,12 +715,23 @@ body {
   transition: background-color 0.3s ease; /* Smooth transition for background color */
 }
 
+.toggle-button-raw:hover {
+  background-color: rgba(58, 58, 58, 0.895);
+  border-radius: 50%;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* Smooth transition for background color */
+}
+
+
 .call-dialog {
     border-radius: 30px;
 }
 
 .call-dialog-content {
   /* border: 2px solid #3f6eb5; */
-  background: linear-gradient(to bottom, #fff 80%, #ccc 20%, #ccc 40%, #fff 80%);
+  background: linear-gradient(to bottom, #fff 0%, #fff 0%, rgba(0, 0, 0, 0.783) 0%, rgb(0, 0, 0) 80%);
   /* border-radius: 30px; */
 }
