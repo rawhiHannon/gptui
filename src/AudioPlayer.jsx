@@ -6,11 +6,17 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
   const historyMessageAudioChunks = useRef([]);
   const isProcessingAudio = useRef(false);
   const [isGptSpeaking, setIsGptSpeaking] = useState(false);
-  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  const audioContextRef = useRef(null);
   const isPlaying = useRef(false);
   let isAudioStreaming = false;
   const sourceRef = useRef(null);
   const isPaused = useRef(false);
+
+  useEffect(() => {
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }, []);
 
   useEffect(() => {
     if (!isPlaying.current) {
@@ -76,16 +82,16 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
     const reader = new FileReader();
     reader.onload = function() {
       const arrayBuffer = this.result;
-      audioContext.decodeAudioData(arrayBuffer, playBuffer, errorHandler);
+      audioContextRef.current.decodeAudioData(arrayBuffer, playBuffer, errorHandler);
     };
     reader.readAsArrayBuffer(combinedBlob);
   }
   
   
   function playBuffer(audioBuffer) {
-    const source = audioContext.createBufferSource();
+    const source = audioContextRef.current.createBufferSource();
     source.buffer = audioBuffer;
-    source.connect(audioContext.destination);
+    source.connect(audioContextRef.current.destination);
     source.start();
     sourceRef.current = source; // Keep a reference to the current source
 
