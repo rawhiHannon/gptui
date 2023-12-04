@@ -44,7 +44,7 @@ const Contacts = () => {
     <div className="assistant-tab active">
     <div className="avatar"></div>
       <div>
-        <span className="assistant-name">Panda</span>
+        <span className="assistant-name">Test</span>
         <div className="last-message">Last message...</div>
       </div>
     </div>

@@ -220,7 +220,7 @@ const AudioChat = () => {
   <Avatar sx={{ bgcolor: "gray" }} style={{ width: "40px", height: "40px", marginRight: "10px" }} />
 
     <div className="person-details">
-      <h2>Panda</h2>
+      <h2>Test</h2>
       {/* Conditionally render the "Online" text */}
       {isOnline && <p>Online</p>}
     </div>

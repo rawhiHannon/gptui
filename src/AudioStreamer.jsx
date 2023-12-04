@@ -184,7 +184,7 @@ return (
     <DialogContent style={{ textAlign: 'center', padding: '20px', position: 'relative', width: "250px" }} className="call-dialog-content">
         {isDialing ? 
             <>
-              <p style={{ color: "white" }}>Calling Panda...</p>
+              <p style={{ color: "white" }}>Calling Test...</p>
               <div onClick={closeDialog} className="call-off-button">
                   <CallEndIcon style={{ color: "white" }} />
               </div>
@@ -192,7 +192,7 @@ return (
         {isStreaming ? 
             <>
             <Avatar sx={{ bgcolor: "gray" }} style={{ width: "80px", height: "80px", margin: "auto", borderColor: "#fff" }} />
-            <div style={{color: "#fff", marginBottom: "0px", marginTop: "5px", fontSize: "25px"}}><b>Panda</b></div>
+            <div style={{color: "#fff", marginBottom: "0px", marginTop: "5px", fontSize: "25px"}}><b>Test</b></div>
             <div style={{color: "#fff", marginBottom: "25px"}}>{formatCallTime()}</div>
           <div className="audio-waves" style={{}}>
             <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
