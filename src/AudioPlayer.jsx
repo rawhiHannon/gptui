@@ -11,6 +11,7 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
   let isAudioStreaming = false;
   const sourceRef = useRef(null);
   const isPaused = useRef(false);
+  let isSpecialMessagePlaying = false; 
 
   useEffect(() => {
     if (!audioContextRef.current) {
@@ -103,6 +104,9 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
   }
   
   const stop = () => {
+    if (isSpecialMessagePlaying) {
+      return;
+    }
     // Stop the current audio source if it's playing
     if (sourceRef.current) {
       sourceRef.current.stop();
@@ -142,6 +146,17 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
   };
 
   const addAudioToQueue  = (stream) => {
+    if (stream.startsWith("<filler>")) {
+      const base64Audio = stream.split("<filler>")[1].trim();
+      const audioBlob = base64ToBlob(base64Audio, 'audio/mpeg');
+  
+      // Stop current audio if playing
+      stop();
+      isSpecialMessagePlaying = true;
+      currentMessageAudioChunks.current = [audioBlob];
+      playNextAudioChunk();
+      return;
+    }
     if (stream === "<CANCEL>") {
       stop();
       // alert("stop")x
