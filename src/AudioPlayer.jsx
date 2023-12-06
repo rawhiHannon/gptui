@@ -94,12 +94,13 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
     source.buffer = audioBuffer;
     source.connect(audioContextRef.current.destination);
     source.start();
-    sourceRef.current = source; // Keep a reference to the current source
+    sourceRef.current = source;
 
     source.onended = () => {
       isPlaying.current = false;
       setIsGptSpeaking(false);
-      playNextAudioChunk(); // Play the next chunk if available
+      isSpecialMessagePlaying = false;
+      playNextAudioChunk();
     };
   }
   
@@ -159,7 +160,6 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
     }
     if (stream === "<CANCEL>") {
       stop();
-      // alert("stop")x
       return;
     }
     if (stream === "StreamComplete") {
