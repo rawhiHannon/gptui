@@ -85,11 +85,50 @@ const AudioRecorder = ({ onRecordingComplete, status }) => {
     };
   }, []);
 
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      if (isMouseDown) {
+        stopRecordingHandler();
+      }
+    };
+  
+    const handleGlobalTouchEnd = () => {
+      if (isMouseDown) {
+        stopRecordingHandler();
+      }
+    };
+  
+    window.addEventListener('mouseup', handleGlobalMouseUp);
+    window.addEventListener('touchend', handleGlobalTouchEnd);
+  
+    return () => {
+      window.removeEventListener('mouseup', handleGlobalMouseUp);
+      window.removeEventListener('touchend', handleGlobalTouchEnd);
+    };
+  }, [isMouseDown]);
+
+  const startRecordingHandler = () => {
+    if (!isRecording) {
+      setIsRecording(true);
+      startRecording();
+    }
+  };
+  
+  const stopRecordingHandler = () => {
+    event.preventDefault();
+    if (isRecording) {
+      setIsRecording(false);
+      stopRecording();
+    }
+  };
+  
   return (
     <div>
       <Button 
         onMouseDown={startRecording} 
         onMouseUp={stopRecording}
+        onTouchStart={startRecordingHandler} // Handle touch start
+        onTouchEnd={stopRecordingHandler}   // Handle touch end
         variant="contained"
         disabled={!status}  // Disable the button if status is false
 

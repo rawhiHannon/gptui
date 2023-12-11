@@ -206,7 +206,7 @@ return (
             <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
             </div>
             
-            <div className='buttons-holder' style={{ gap: '15px' }}>
+            <div className='buttons-holder' style={{ gap: '25px' }}>
                 <div onClick={closeDialog} className="toggle-button-raw">
                     {isAudioEnabled ? (
                       <VolumeUpIcon style={{ color: "white", width: "25px", height: "25px" }} onClick={toggleAudio} />

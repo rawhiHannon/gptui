@@ -39,6 +39,8 @@ body {
   border-right: 1px solid #e0e0e0; /* Subtle border */
 }
 
+
+
 .sidebar {
   width: 25vw;
   max-height: calc(100vh); /* Adjust height as needed, assuming there's a header of 60px */
@@ -273,40 +275,6 @@ body {
 }
 
 
-/* Positioning the eyes */
-.left-eye {
-  left: 110px; /* Adjust as necessary */
-  top: 10px; /* Adjust as necessary */
-}
-
-.right-eye {
-  right: 110px; /* Adjust as necessary */
-  top: 10px; /* Adjust as necessary */
-}
-
-
-@keyframes talking {
-  0%, 100% { height: 35px; }
-  50% { height: 10px; }
-}
-
-.mouth {
-  width: 15px;
-  height: 20px;
-  margin-bottom: 5px;
-  background-color: #9b302c; /* White color for the mouth */
-  border-radius: 230px / 230px;
-  animation: talking 0.3s infinite;
-}
-
-.nospeak-mouth {
-  width: 15px;
-  height: 1px;
-  background-color: #592f2a; /* White color for the mouth */
-  border-radius: 100px / 10px; /* Creates an oval shape */
-  position: relative;
-}
-
 .chat-header {
   display: flex;
   align-items: center; /* Align items vertically */
@@ -328,70 +296,115 @@ body {
 }
 
 .head {
-  width: 50px; /* Adjust the size of the head */
-  height: 50px;
+  width: 50px; /* Smaller head size */
+  height: 50px; /* Smaller head size */
   border-radius: 50%;
-  background-color: rgb(176, 157, 157); /* Background color of the head */
+  background-color: #f2ccbb;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 0px; /* Adjust as needed for internal spacing */
+  position: relative;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+  padding: 0px;
   box-sizing: border-box;
-  margin-right: 10px;;
+  margin-right: 15px;
 }
 
-.eyes-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 5px; /* Adjust the space between eyes and nose */
+.hair {
+  background-color: #8b4513;
+  width: 100%;
+  height: 20px; /* Smaller hair height */
+  border-radius: 50% 50% 0 0;
+  position: absolute;
+  top: 0;
 }
 
+.eyes-container,
 .eyebrow-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 5px; /* Adjust the space between eyes and nose */
-}
-
-.eyebrow {
-  width: 10px;
-  height: 2px;
-  background-color: #000;
-  border-radius: 50%;
-  margin: 0 4px; /* Minimize space between the eyes */
-  position: relative; /* Needed for absolute positioning of the pupil */
+  margin-bottom: 3px; /* Smaller margin */
 }
 
 .eye {
-  width: 10px;
-  height: 10px;
+  width: 12px; /* Smaller eye width */
+  height: 12px; /* Smaller eye height */
   background-color: #fff;
-  border-radius: 30%;
-  margin: 0 5px; /* Minimize space between the eyes */
-  position: relative; /* Needed for absolute positioning of the pupil */
+  border-radius: 50%;
+  margin: 0 6px; /* Smaller margin */
+  position: relative;
+  overflow: hidden;
 }
 
-.pupil {
-  width: 4px;
-  height: 4px;
-  background-color: #000; /* Black color for the pupil */
+.iris {
+  width: 7px; /* Smaller iris width */
+  height: 7px; /* Smaller iris height */
+  background: radial-gradient(circle, #4169E1 60%, #000 100%);
   border-radius: 50%;
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* Center the pupil within the eye */
+  transform: translate(-50%, -50%);
+}
+
+.pupil {
+  width: 2px; /* Smaller pupil width */
+  height: 2px; /* Smaller pupil height */
+  background-color: #000;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.eyebrow {
+  width: 15px; /* Smaller eyebrow width */
+  height: 3px; /* Smaller eyebrow height */
+  background-color: #000;
+  border-radius: 10px;
+  margin: 0 3px; /* Smaller margin */
+  position: relative;
+}
+
+.eyebrow.left {
+  transform: rotate(-10deg);
+}
+
+.eyebrow.right {
+  transform: rotate(10deg);
 }
 
 .nose {
-  width: 2px;
-  height: 5px;
+  width: 1px; /* Narrower nose */
+  height: 5px; /* Shorter nose */
   background-color: #592f2a;
-  border-radius: 0%;
-  margin-bottom: 12px; /* Adjust as needed */
-  transform: rotate(0deg); /* Rotate to create an upward curve */
+  border-radius: 0;
+  margin-bottom: 8px; /* Smaller margin */
 }
+
+.mouth {
+  width: 10px; /* Smaller mouth width */
+  height: 5px; /* Smaller mouth height */
+  background-color: #9b302c;
+  border-radius: 0 0 10px 10px;
+  animation: talking 0.3s infinite;
+}
+
+.nospeak-mouth {
+  width: 8px; /* Smaller mouth width */
+  height: 1px; /* Smaller mouth height */
+  background-color: #592f2a;
+  border-radius: 100px / 10px;
+}
+
+@keyframes talking {
+  0%, 100% { height: 5px; }
+  50% { height: 2px; }
+}
+
 
 .chat-select {
   background-color: white;
@@ -469,6 +482,7 @@ body {
   border-bottom: 1px solid #e0e0e0;
   background-color: rgb(245, 242, 242);
   background-color: #fff;
+  padding-left: 0px;
 }
 
 .chat-input input {
@@ -734,4 +748,57 @@ body {
   /* border: 2px solid #3f6eb5; */
   background: linear-gradient(to bottom, #fff 0%, #fff 0%, rgba(0, 0, 0, 0.783) 0%, rgb(0, 0, 0) 80%);
   /* border-radius: 30px; */
+}
+
+@media only screen and (max-width: 600px) {
+  .chat-container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    /* background-color: #d3d3d3; */
+    border-right: 0px solid #e0e0e0; /* Subtle border */
+  }
+
+  .person-info {
+    position: fixed;
+    top: 0;
+    width: 95%;
+    z-index: 100;
+
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 2px solid #3f6eb5;
+    border-top: 1px solid #e0e0e0;
+    background-color: #fff;
+    height: 50px; /* Set a fixed height */
+    min-height: 50px;
+    
+}
+
+.chat-input {
+    position: fixed;
+    bottom: 0; /* Adjust as needed */
+    width: 100%; /* Ensures full width */
+    z-index: 100; /* Ensures it stays on top */
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    border: 2px solid #3f6eb5;
+    border-left: 0px;
+    border-right: 0px;
+    /* border-top: 0px; */
+    border-bottom: 1px solid #e0e0e0;
+    background-color: rgb(245, 242, 242);
+    background-color: #fff;
+}
+
+  .chat-messages {
+      margin-top: 70px;
+      margin-bottom: 35px;
+      overflow-y: auto;
+      flex: 1;
+      padding: 20px;
+      border-bottom: #333f80;
+  }
 }

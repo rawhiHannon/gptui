@@ -1,6 +1,44 @@
+function generateOrRetrieveBearer() {
+  const localStorageKey = 'uniqueBearerToken';
+
+  // Check if the token already exists in local storage
+  let bearerToken = localStorage.getItem(localStorageKey);
+  if (bearerToken) {
+      return bearerToken;
+  }
+
+  // Generate a new token
+  const screenResolution = `${screen.width}x${screen.height}`;
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const language = navigator.language;
+  const randomPart = Math.random().toString(36).substring(2, 15);
+
+  const combinedString = `${screenResolution}-${timezone}-${language}-${randomPart}`;
+  bearerToken = hashString(combinedString);
+
+  // Store the new token in local storage
+  localStorage.setItem(localStorageKey, bearerToken);
+
+  return bearerToken;
+}
+
+function hashString(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash |= 0;
+  }
+  return hash.toString();
+}
+
+// Usage
+const uniqueBearer = generateOrRetrieveBearer();
+
 function WebSocketsManager() {
   this.ws = null;
-  this.serverUrl = "ws://localhost:7879/api/ws";
+  this.serverUrl = "wss://www.metesapi.com/api/ws";
+  // this.serverUrl = "ws://localhost:7879/api/ws";
   this.roomInput = null;
   this.rooms = [];
   this.manager = null;
@@ -32,10 +70,11 @@ self.isWSConnected = function() {
   return this.connected
 }
 
+
 //TODO: handle reject
 self.connectToWebsocket = function() {
 return new Promise((resolve, reject) => {
-  this.ws = new WebSocket(this.serverUrl + "?bearer=1233456&host=agentbuddy.me");
+  this.ws = new WebSocket(this.serverUrl + "?bearer=" + uniqueBearer + "&host=agentbuddy.me");
   this.ws.addEventListener('open', (event) => { this.onWebsocketOpen(event, resolve) });
   this.ws.addEventListener('message', (event) => { this.handleNewMessage(event) });
   this.ws.addEventListener('close', (event) => { this.handleClose(event) });

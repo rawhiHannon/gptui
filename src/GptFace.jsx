@@ -4,16 +4,21 @@ const GptFace = ({ isSpeaking, isOnCall }) => {
   return (
     isSpeaking && !isOnCall && (
       <div className="head">
+        <div className="hair"></div>
         <div className="eyebrow-container">
-          <div className="eyebrow"></div>
-          <div className="eyebrow"></div>
+          <div className="eyebrow left"></div>
+          <div className="eyebrow right"></div>
         </div>
         <div className="eyes-container">
           <div className="eye">
-            <div className="pupil"></div>
+            <div className="iris">
+              <div className="pupil"></div>
+            </div>
           </div>
           <div className="eye">
-            <div className="pupil"></div>
+            <div className="iris">
+              <div className="pupil"></div>
+            </div>
           </div>
         </div>
         <div className="nose"></div>

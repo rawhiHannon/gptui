@@ -210,9 +210,9 @@ const AudioChat = () => {
 
   <div className="chat-container">
   
-    <div className="sidebar">
+    {/* <div className="sidebar">
       <Contacts />
-    </div>
+    </div> */}
 
 
   <div className="chat">
