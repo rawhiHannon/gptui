@@ -164,72 +164,56 @@ const toggleMic = () => {
   // Additional logic to actually enable/disable the mic can be added here
 };
 
+
 return (
   <div>
     <div 
         onClick={handleIconClick}
-        className={`${!status || isStreaming ? 'round-button-inactive' : 'round-button'}`}
+        className={`${!status || isStreaming ? 'call-button-inactive' : 'call-button'}`}
         style={{
             outline: "none", 
             borderRadius: "50%", 
             cursor: status ? 'pointer' : 'default',
-            // backgroundColor removed
         }}
     >
           {isStreaming ? <CallEndIcon style={{ color: "red", minWidth: "40px" }} /> : <CallIcon />}
       </div>
 
-
-<Dialog id="dialogContent" open={shouldShowDialog} onClose={preventDialogClose} className="call-dialog">
-    <DialogContent style={{ textAlign: 'center', padding: '20px', position: 'relative', width: "250px" }} className="call-dialog-content">
-        {isDialing ? 
-            <>
-              <p style={{ color: "white" }}>Calling Test...</p>
-              <div onClick={closeDialog} className="call-off-button">
-                  <CallEndIcon style={{ color: "white" }} />
+    <Dialog id="dialogContent" open={shouldShowDialog} onClose={preventDialogClose} className="call-dialog">
+      <DialogContent className="call-dialog-content">
+        {isDialing ? (
+          <>
+            <p>Calling Test...</p>
+            <CallEndIcon className="icon end-call" onClick={closeDialog} />
+          </>
+        ) : null}
+        {isStreaming ? (
+          <>
+            <Avatar className="avatar" />
+            <div className="contact-name">Test</div>
+            <div className="call-time">{formatCallTime()}</div>
+            <div className="audio-waves">
+              {Array(9).fill().map((_, idx) => (
+                <div key={idx} className={`wave ${talkingStatus ? 'animated' : ''}`}></div>
+              ))}
+            </div>
+            <div className='buttons-holder'>
+              <div onClick={toggleAudio} className="toggle-button">
+                {isAudioEnabled ? <VolumeUpIcon className="icon" /> : <VolumeOffIcon className="icon" />}
               </div>
-            </> : <></> }
-        {isStreaming ? 
-            <>
-            <Avatar sx={{ bgcolor: "gray" }} style={{ width: "80px", height: "80px", margin: "auto", borderColor: "#fff" }} />
-            <div style={{color: "#fff", marginBottom: "0px", marginTop: "5px", fontSize: "25px"}}><b>Test</b></div>
-            <div style={{color: "#fff", marginBottom: "25px"}}>{formatCallTime()}</div>
-          <div className="audio-waves" style={{}}>
-            <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
-            <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
-            <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
-            <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
-            <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
-            <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
-            <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
-            <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
-            <div className={`wave ${talkingStatus ? 'wave-animated' : 'wave-static'}`}></div>
+              <div onClick={toggleMic} className="toggle-button">
+                {isMicOn ? <MicIcon className="icon" /> : <MicOffIcon className="icon" />}
+              </div>
+              <div onClick={closeDialog} className="toggle-button end-call">
+                <CallEndIcon className="icon" />
+              </div>
             </div>
-            
-            <div className='buttons-holder' style={{ gap: '25px' }}>
-                <div onClick={closeDialog} className="toggle-button-raw">
-                    {isAudioEnabled ? (
-                      <VolumeUpIcon style={{ color: "white", width: "25px", height: "25px" }} onClick={toggleAudio} />
-                    ) : (
-                      <VolumeOffIcon style={{ color: "white", width: "25px", height: "25px" }} onClick={toggleAudio} />
-                    )}
-                </div>
-                <div onClick={toggleMic} className="toggle-button-raw">
-                        {isMicOn ? 
-                            <MicIcon style={{ color: "white", width: "25px", height: "25px" }} /> : 
-                            <MicOffIcon style={{ color: "white", width: "25px", height: "25px" }} />
-                        }
-                </div>
-                <div onClick={closeDialog} className="call-off-button" style={{ width: "30px", height: "30px" }}>
-                    <CallEndIcon style={{ color: "white", fontSize: "20px" }} />
-                </div>
-            </div>
-            </>: <></>
-          }
-          </DialogContent>
-        </Dialog>
-    </div>
-    );
+          </>
+        ) : null}
+      </DialogContent>
+    </Dialog>
+  </div>
+);
 };
 
 export default AudioStreamer;

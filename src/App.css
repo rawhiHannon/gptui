@@ -33,10 +33,10 @@ body {
 
 .chat-container {
   display: flex;
-  width: 60vw;
-  height: 95vh;
+  width: 50vw;
+  height: 100vh;
   /* background-color: #d3d3d3; */
-  border-right: 1px solid #e0e0e0; /* Subtle border */
+  border-right: 0px solid #e0e0e0; /* Subtle border */
 }
 
 .sidebar {
@@ -68,16 +68,6 @@ body {
   color: #333;
   cursor: pointer;
   transition: background-color 0.3s ease; /* Smooth transition for hover effect */
-}
-
-.avatar {
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #ccc; /* Primary color for avatar */
-  margin-right: 10px;
-  border: 2px solid #ffffff; /* White border for contrast */
 }
 
 .assistant-tab:hover, .assistant-tab.active {
@@ -126,6 +116,8 @@ body {
 }
 
 .person-info {
+
+  
   display: flex;
   align-items: center;
   padding: 10px;
@@ -259,20 +251,6 @@ body {
   border-bottom-right-radius: 0; /* Adjust corner for self messages */
 }
 
-.chat {
-  display: flex;
-  flex-grow: 1;
-  flex-direction: column;
-  width: calc(100% - 250px);
-  height: 100vh;
-  background-color: #f2f2f2;
-  /* border-radius: 10px; */
-  /* margin: 20px auto; */
-  box-shadow: 4px 2px 4px rgba(0, 0, 0, 0.1);
-  border-left: 1px solid #e0e0e0;
-}
-
-
 .chat-header {
   display: flex;
   align-items: center; /* Align items vertically */
@@ -293,117 +271,6 @@ body {
   align-items: left; /* Center text vertically */
 }
 
-.head {
-  width: 50px; /* Smaller head size */
-  height: 50px; /* Smaller head size */
-  border-radius: 50%;
-  background-color: #f2ccbb;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
-  padding: 0px;
-  box-sizing: border-box;
-  margin-right: 15px;
-}
-
-.hair {
-  background-color: #8b4513;
-  width: 100%;
-  height: 20px; /* Smaller hair height */
-  border-radius: 50% 50% 0 0;
-  position: absolute;
-  top: 0;
-}
-
-.eyes-container,
-.eyebrow-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 3px; /* Smaller margin */
-}
-
-.eye {
-  width: 12px; /* Smaller eye width */
-  height: 12px; /* Smaller eye height */
-  background-color: #fff;
-  border-radius: 50%;
-  margin: 0 6px; /* Smaller margin */
-  position: relative;
-  overflow: hidden;
-}
-
-.iris {
-  width: 7px; /* Smaller iris width */
-  height: 7px; /* Smaller iris height */
-  background: radial-gradient(circle, #4169E1 60%, #000 100%);
-  border-radius: 50%;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.pupil {
-  width: 2px; /* Smaller pupil width */
-  height: 2px; /* Smaller pupil height */
-  background-color: #000;
-  border-radius: 50%;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.eyebrow {
-  width: 15px; /* Smaller eyebrow width */
-  height: 3px; /* Smaller eyebrow height */
-  background-color: #000;
-  border-radius: 10px;
-  margin: 0 3px; /* Smaller margin */
-  position: relative;
-}
-
-.eyebrow.left {
-  transform: rotate(-10deg);
-}
-
-.eyebrow.right {
-  transform: rotate(10deg);
-}
-
-.nose {
-  width: 1px; /* Narrower nose */
-  height: 5px; /* Shorter nose */
-  background-color: #592f2a;
-  border-radius: 0;
-  margin-bottom: 8px; /* Smaller margin */
-}
-
-.mouth {
-  width: 10px; /* Smaller mouth width */
-  height: 5px; /* Smaller mouth height */
-  background-color: #9b302c;
-  border-radius: 0 0 10px 10px;
-  animation: talking 0.3s infinite;
-}
-
-.nospeak-mouth {
-  width: 8px; /* Smaller mouth width */
-  height: 1px; /* Smaller mouth height */
-  background-color: #592f2a;
-  border-radius: 100px / 10px;
-}
-
-@keyframes talking {
-  0%, 100% { height: 5px; }
-  50% { height: 2px; }
-}
-
-
 .chat-select {
   background-color: white;
   color: white;
@@ -413,21 +280,10 @@ body {
   height: 35px
 }
 
-.chat-messages {
-  overflow-y: auto;
-  flex: 1;
-  padding: 20px;
-  border-bottom: #333f80;
-}
-
 .message {
   display: flex;
   align-items: flex-end; /* Aligns message bubble at the bottom */
   margin-bottom: 20px;
-}
-
-.message.me {
-  justify-content: flex-end;
 }
 
 .message.other {
@@ -446,6 +302,7 @@ body {
 
 
 .message.other .text {
+  color: #000;
   border-bottom-left-radius: 0; /* Adjust corner for other messages */
 }
 
@@ -469,26 +326,13 @@ body {
   text-align: left;
 }
 
-.chat-input {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  border: 2px solid #3f6eb5;
-  border-left: 0px;
-  border-right: 0px;
-  /* border-top: 0px; */
-  border-bottom: 1px solid #e0e0e0;
-  background-color: rgb(245, 242, 242);
-  background-color: #fff;
-  padding-left: 0px;
-}
 
 .chat-input input {
   background-color: white;
   padding: 10px;
   border-radius: 8px;
   /* box-shadow: 0px 0px 10px #ccc; */
-  width: 90%;
+  width: 100%;
   /* height: 20px; */
   margin: 2px;
   margin-bottom: 5px;
@@ -496,6 +340,7 @@ body {
   outline: none;
   border: none;
   font-size: 16px;
+  color: #000;
 }
 
 .chat-input button {
@@ -616,44 +461,6 @@ body {
   text-transform: uppercase;
 }
 
-.audio-waves {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 20px; /* Fixed height */
-  width: 100%; /* Full width */
-  overflow: hidden; /* Hide any overflow */
-  margin-bottom: 20px;
-}
-
-.wave {
-  background: #3f6eb5;
-  width: 4px;
-  height: 20px;
-  margin: 0 1px;
-  border-radius: 2px;
-}
-
-.wave-static {
-  transform: scale(1);
-}
-
-.wave-animated {
-  animation: waveAnimation 1.2s infinite ease-in-out both;
-}
-
-.wave:nth-child(odd) {
-  animation-delay: -0.6s;
-}
-
-@keyframes waveAnimation {
-  0%, 100% {
-    height: 10px;
-  }
-  50% {
-    height: 30px;
-  }
-}
 
 .PowerSettingsNewIcon {
   color: red;
@@ -686,6 +493,8 @@ body {
   height: 40px; /* Increased size */
   cursor: pointer;
   transition: background-color 0.3s ease; /* Smooth transition for background color */
+  margin-left: 12px; 
+  margin-right: 12px; 
 }
 
 .toggle-button:hover {
@@ -710,11 +519,11 @@ body {
   display: inline-flex;
   justify-content: 'center';
   align-items: 'center';
-  background-color: rgba(0, 0, 0, 0.895);
+  /* background-color: rgba(0, 0, 0, 0.895); */
   padding: 10px;
   /* padding-left: 15px; */
   border-radius: 15px;
-  margin-top: 0px;
+  /* margin-top: 0px; */
 }
 
 .toggle-button-raw {
@@ -748,7 +557,7 @@ body {
   /* border-radius: 30px; */
 }
 
-@media only screen and (max-width: 700px) {
+@media only screen and (max-width: 1200px) {
   .chat-container {
     display: flex;
     width: 100vw;
@@ -756,14 +565,14 @@ body {
     /* background-color: #d3d3d3; */
     border-right: 0px solid #e0e0e0; /* Subtle border */
   }
+}
 
   .person-info {
     position: fixed;
     top: 0;
     left: 0;
-    width: 95%;
+    width: 100%;
     z-index: 100;
-
     display: flex;
     align-items: center;
     padding: 10px;
@@ -791,6 +600,7 @@ body {
     border-bottom: 1px solid #e0e0e0;
     background-color: rgb(245, 242, 242);
     background-color: #fff;
+    height: 55px;
 }
 
   .chat-messages {
@@ -814,4 +624,316 @@ body {
     box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.1);
     border-left: 1px solid #e0e0e0;
   }
+/* } */
+
+.call-button {
+  color: white; /* White icon color */
+  outline: none;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 10px;
+  background-color: #4caf50;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s, transform 0.2s;
+  height: 25px;
+  width: 25px;
+  margin-right: 10px;
 }
+
+.call-button-inactive {
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s, transform 0.2s;
+  background-color: rgba(204, 204, 204, 0.52);
+  color: rgb(171, 171, 171);
+  margin: 2px;
+  margin-left: 5px;
+  margin-right: 5px;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  height: 25px;
+  border-radius: 50%;
+  min-width: 0;
+  width: 25px;
+}
+
+.call-button .icon {
+  color: white;
+  /* font-size: 24px; */
+}
+
+.call-button:hover {
+  background-color: #388e3c;
+  /* transform: scale(1.1); */
+}
+
+/* Dialog Styles */
+.call-dialog .MuiDialog-paper {
+  background-color: #2c3e50; /* Dark background for the dialog */
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.call-dialog-content {
+  text-align: center;
+  padding: 20px;
+  color: white; /* White text for contrast */
+}
+
+.avatar {
+  width: 100px;
+  height: 100px;
+  margin: auto;
+  background-color: gray;
+  border: 3px solid white;
+}
+
+.contact-name {
+  margin-top: 10px;
+  font-size: 35px;
+  font-weight: bold;
+}
+
+.call-time {
+  margin-bottom: 30px;
+  margin-top: 5px;
+}
+
+
+.dialog-toggle-button {
+  outline: none;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s, transform 0.2s;
+  color: white; /* White icon color */
+}
+
+.toggle-button .icon {
+  font-size: 24px; /* Adjust icon size */
+}
+
+.toggle-button:not(.end-call):hover {
+  transform: scale(1.1); /* Slightly enlarge on hover */
+}
+
+/* End Call Button Styles */
+.end-call {
+  background-color: red; /* Red background for end call button */
+  outline: none;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white; /* White icon color */
+}
+
+.end-call:hover {
+  background-color: #c0392b; /* Darker red on hover */
+}
+
+/* Other Buttons Styles */
+.toggle-button:not(.end-call) {
+  background-color: #2980b9; /* Blue background for other buttons */
+}
+
+.toggle-button:not(.end-call):hover {
+  background-color: #21618c; /* Darker blue on hover */
+}
+
+/* Dialog Styles */
+.call-dialog .MuiDialog-paper {
+  background-color: #2c3e50; /* Dark background for the dialog */
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.call-dialog-content {
+  text-align: center;
+  padding: 20px;
+  color: white; /* White text for contrast */
+}
+
+
+
+
+/*
+***************************************** wave
+*/
+
+
+.audio-waves {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin: 20px 0;
+}
+
+.wave {
+  width: 4px;
+  background-color: white;
+  border-radius: 2px;
+  opacity: 0.7;
+  transform-origin: bottom; /* Ensure waves expand from the bottom */
+}
+
+.wave.animated {
+  animation: waveAnimation 1.5s infinite ease-in-out;
+}
+
+/* Individual wave styles */
+.wave:nth-child(1) { height: 10px; }
+.wave:nth-child(2) { height: 10px; }
+.wave:nth-child(3) { height: 10px; }
+.wave:nth-child(4) { height: 10px; }
+.wave:nth-child(5) { height: 10px; }
+.wave:nth-child(6) { height: 10px; }
+.wave:nth-child(7) { height: 10px; }
+.wave:nth-child(8) { height: 10px; }
+.wave:nth-child(9) { height: 10px; }
+
+/* Conditional animation based on the 'animated' class */
+.wave.animated:nth-child(1) { animation: waveAnimation 1.2s infinite ease-in-out; }
+.wave.animated:nth-child(2) { animation: waveAnimation 1.4s infinite ease-in-out; }
+.wave.animated:nth-child(3) { animation: waveAnimation 1.1s infinite ease-in-out; }
+.wave.animated:nth-child(4) { animation: waveAnimation 1.3s infinite ease-in-out; }
+.wave.animated:nth-child(5) { animation: waveAnimation 1.5s infinite ease-in-out; }
+.wave.animated:nth-child(6) { animation: waveAnimation 1.2s infinite ease-in-out; }
+.wave.animated:nth-child(7) { animation: waveAnimation 1.4s infinite ease-in-out; }
+.wave.animated:nth-child(8) { animation: waveAnimation 1.1s infinite ease-in-out; }
+.wave.animated:nth-child(9) { animation: waveAnimation 1.3s infinite ease-in-out; }
+
+@keyframes waveAnimation {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(2.5); }
+}
+
+
+
+
+/*
+***************************************** head
+*/
+
+
+
+.head {
+  width: 50px; /* Smaller head size */
+  height: 50px; /* Smaller head size */
+  border-radius: 50%;
+  background-color: #f2ccbb;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+  padding: 0px;
+  box-sizing: border-box;
+  margin-right: 15px;
+}
+
+.hair {
+  background-color: #8b4513;
+  width: 100%;
+  height: 20px; /* Smaller hair height */
+  border-radius: 50% 50% 0 0;
+  position: absolute;
+  top: 0;
+}
+
+.eyes-container,
+.eyebrow-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 3px; /* Smaller margin */
+}
+
+.eye {
+  width: 12px; /* Smaller eye width */
+  height: 12px; /* Smaller eye height */
+  background-color: #fff;
+  border-radius: 50%;
+  margin: 0 6px; /* Smaller margin */
+  position: relative;
+  overflow: hidden;
+}
+
+.iris {
+  width: 7px; /* Smaller iris width */
+  height: 7px; /* Smaller iris height */
+  background: radial-gradient(circle, #4169E1 60%, #000 100%);
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.pupil {
+  width: 2px; /* Smaller pupil width */
+  height: 2px; /* Smaller pupil height */
+  background-color: #000;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.eyebrow {
+  width: 15px; /* Smaller eyebrow width */
+  height: 3px; /* Smaller eyebrow height */
+  background-color: #000;
+  border-radius: 10px;
+  margin: 0 3px; /* Smaller margin */
+  position: relative;
+}
+
+.eyebrow.left {
+  transform: rotate(-10deg);
+}
+
+.eyebrow.right {
+  transform: rotate(10deg);
+}
+
+.nose {
+  width: 1px; /* Narrower nose */
+  height: 5px; /* Shorter nose */
+  background-color: #592f2a;
+  border-radius: 0;
+  margin-bottom: 8px; /* Smaller margin */
+}
+
+.mouth {
+  width: 10px; /* Smaller mouth width */
+  height: 5px; /* Smaller mouth height */
+  background-color: #9b302c;
+  border-radius: 0 0 10px 10px;
+  animation: talking 0.3s infinite;
+}
+
+.nospeak-mouth {
+  width: 8px; /* Smaller mouth width */
+  height: 1px; /* Smaller mouth height */
+  background-color: #592f2a;
+  border-radius: 100px / 10px;
+}
+
+@keyframes talking {
+  0%, 100% { height: 5px; }
+  50% { height: 2px; }
+}
+

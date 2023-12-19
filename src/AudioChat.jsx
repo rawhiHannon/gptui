@@ -243,7 +243,7 @@ const AudioChat = () => {
         )}
       </div>
 
-      <IconButton onClick={toggleMenu} style={{ color: '#3f6eb5', outline: 'none' }}><MoreVertIcon /></IconButton>
+      <IconButton onClick={toggleMenu} style={{ color: '#3f6eb5', outline: 'none', marginRight: '15px' }}><MoreVertIcon /></IconButton>
       {showMenu && (
         <div ref={menuRef} className="menu">
           <div className="menu-item" onClick={clearHistory}>Clear History</div>
