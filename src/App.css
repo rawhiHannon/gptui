@@ -473,8 +473,8 @@ body {
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  width: 40px;  /* Increased size */
-  height: 40px; /* Increased size */
+  width: 40px; 
+  height: 40px;
   cursor: pointer;
   transition: background-color 0.3s ease; /* Smooth transition for background color */
 }
@@ -489,12 +489,11 @@ body {
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  width: 40px;  /* Increased size */
-  height: 40px; /* Increased size */
+  width: 50px; 
+  height: 50px;
   cursor: pointer;
   transition: background-color 0.3s ease; /* Smooth transition for background color */
-  margin-left: 12px; 
-  margin-right: 12px; 
+  margin-right: 24px;
 }
 
 .toggle-button:hover {
@@ -718,24 +717,31 @@ body {
 }
 
 .toggle-button .icon {
-  font-size: 24px; /* Adjust icon size */
+  font-size: 30px;
 }
 
-.toggle-button:not(.end-call):hover {
-  transform: scale(1.1); /* Slightly enlarge on hover */
+/* .toggle-button:not(.end-call):hover {
+  transform: scale(1.1);
+} */
+
+.toggle-button:hover {
+  transform: scale(1.1);
 }
 
 /* End Call Button Styles */
 .end-call {
-  background-color: red; /* Red background for end call button */
+  width: 50px;
+  height: 50px;
+  transition: background-color 0.3s ease;
+  background-color: red;
   outline: none;
   border-radius: 50%;
   cursor: pointer;
-  padding: 5px;
   display: flex;
   justify-content: center;
   align-items: center;
-  color: white; /* White icon color */
+  color: white;
+  margin: auto;
 }
 
 .end-call:hover {

@@ -184,7 +184,9 @@ return (
         {isDialing ? (
           <>
             <p>Calling Test...</p>
-            <CallEndIcon className="icon end-call" onClick={closeDialog} />
+            <div onClick={closeDialog} className="end-call">
+                <CallEndIcon className="icon"/>
+            </div>
           </>
         ) : null}
         {isStreaming ? (
@@ -204,7 +206,7 @@ return (
               <div onClick={toggleMic} className="toggle-button">
                 {isMicOn ? <MicIcon className="icon" /> : <MicOffIcon className="icon" />}
               </div>
-              <div onClick={closeDialog} className="toggle-button end-call">
+              <div onClick={closeDialog} className="end-call">
                 <CallEndIcon className="icon" />
               </div>
             </div>

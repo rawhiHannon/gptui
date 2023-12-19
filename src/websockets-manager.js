@@ -1,44 +1,43 @@
-function generateOrRetrieveBearer() {
-  const localStorageKey = 'uniqueBearerToken';
+async function generateUniqueKey() {
+  const localStorageKey = 'uniqueDeviceKey';
 
-  // Check if the token already exists in local storage
-  let bearerToken = localStorage.getItem(localStorageKey);
-  if (bearerToken) {
-      return bearerToken;
+  // Check if the key already exists in local storage
+  let uniqueKey = localStorage.getItem(localStorageKey);
+  if (uniqueKey) {
+      return uniqueKey;
   }
 
-  // Generate a new token
-  const screenResolution = `${screen.width}x${screen.height}`;
+  // Collecting device-specific information
+  const screenResolution = `${window.screen.width}x${window.screen.height}`;
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const language = navigator.language;
   const randomPart = Math.random().toString(36).substring(2, 15);
 
+  // Combining the information into a single string
   const combinedString = `${screenResolution}-${timezone}-${language}-${randomPart}`;
-  bearerToken = hashString(combinedString);
 
-  // Store the new token in local storage
-  localStorage.setItem(localStorageKey, bearerToken);
+  // Hashing the combined string using a SHA-256 hash function
+  uniqueKey = await sha256(combinedString);
 
-  return bearerToken;
+  // Store the new key in local storage
+  localStorage.setItem(localStorageKey, uniqueKey);
+
+  return uniqueKey;
 }
 
-function hashString(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash |= 0;
-  }
-  return hash.toString();
+// SHA-256 hash function returning a Promise that resolves to a hex string
+async function sha256(str) {
+  // Encoding str into a Uint8Array
+  const buffer = new TextEncoder().encode(str);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+  // Converting the ArrayBuffer to a hex string
+  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
-
-// Usage
-const uniqueBearer = generateOrRetrieveBearer();
 
 function WebSocketsManager() {
   this.ws = null;
-  this.serverUrl = "wss://www.metesapi.com/api/ws";
-  // this.serverUrl = "ws://localhost:7879/api/ws";
+  // this.serverUrl = "wss://www.metesapi.com/api/ws";
+  this.serverUrl = "ws://localhost:7879/api/ws";
   this.roomInput = null;
   this.rooms = [];
   this.manager = null;
@@ -72,13 +71,19 @@ self.isWSConnected = function() {
 
 
 //TODO: handle reject
-self.connectToWebsocket = function() {
-return new Promise((resolve, reject) => {
-  this.ws = new WebSocket(this.serverUrl + "?bearer=" + uniqueBearer + "&host=agentbuddy.me");
-  this.ws.addEventListener('open', (event) => { this.onWebsocketOpen(event, resolve) });
-  this.ws.addEventListener('message', (event) => { this.handleNewMessage(event) });
-  this.ws.addEventListener('close', (event) => { this.handleClose(event) });
-})
+self.connectToWebsocket = async function() {
+  var uniqueKey = ""
+  try {
+    uniqueKey = await generateUniqueKey();
+  } catch (error) {
+      console.error('Error initializing WebSocket connection:', error);
+  }
+  return new Promise((resolve, reject) => {
+    this.ws = new WebSocket(this.serverUrl + "?bearer=" + uniqueKey + "&host=agentbuddy.me");
+    this.ws.addEventListener('open', (event) => { this.onWebsocketOpen(event, resolve) });
+    this.ws.addEventListener('message', (event) => { this.handleNewMessage(event) });
+    this.ws.addEventListener('close', (event) => { this.handleClose(event) });
+  })
 }
 
 self.handleClose = function(event) {
