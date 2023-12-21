@@ -63,39 +63,25 @@ const AudioChat = () => {
     };
   }, [showMenu]);
 
-  useEffect(() => {
-    Manager.registerChatHandler(receiveChatMessage);
-  }, []);
 
   useEffect(() => {
+    Manager.registerChatHandler(receiveChatMessage);
     setIsOnline(Manager.isWSConnected());
     Manager.setWSStatusCallback((status) => {
       setIsOnline(status);
-    });    
+    });
+    const storedMessages = localStorage.getItem('messages');
+    if (storedMessages) {
+      setMessages(JSON.parse(storedMessages));
+    }
   }, []);
 
 
   useEffect(() => {
     chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
-  }, [messages]);
-
-  useEffect(() => {
     localStorage.setItem('messages', JSON.stringify(messages));
   }, [messages]);
 
-  useEffect(() => {
-    const storedMessages = localStorage.getItem('messages');
-    if (storedMessages) {
-      setMessages(JSON.parse(storedMessages));
-    }
-  }, []);
-  
-  useEffect(() => {
-    const storedMessages = localStorage.getItem('messages');
-    if (storedMessages) {
-      setMessages(JSON.parse(storedMessages));
-    }
-  }, []);
 
   const receiveChatMessage = (message) => {
     if (message.transcription) {
