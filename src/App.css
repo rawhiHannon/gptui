@@ -36,11 +36,11 @@ body {
   width: 50vw;
   height: 100vh;
   /* background-color: #d3d3d3; */
-  border-right: 0px solid #e0e0e0; /* Subtle border */
+  border-right: 1px solid #e0e0e0; /* Subtle border */
 }
 
 .sidebar {
-  width: 25vw;
+  width: 40vw;
   max-height: calc(100vh); /* Adjust height as needed, assuming there's a header of 60px */
   background-color: #fff;
   border-right: 0px solid #ccc;
@@ -55,6 +55,9 @@ body {
   overflow-y: auto; /* Enables scrolling for the assistant list */
   flex-grow: 1; /* Allows the list to take up the remaining height */
   border-right: 0px solid #636da4;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Aligns content to the left */
 }
 
 .assistant-tab {
@@ -116,8 +119,6 @@ body {
 }
 
 .person-info {
-
-  
   display: flex;
   align-items: center;
   padding: 10px;
@@ -244,8 +245,8 @@ body {
 .message.me .text {
   background-color: #3f6eb5; /* Green background for sent messages */
   color: #fff; /* Dark text for readability */
-  border-radius: 7px;
-  padding: 6px 10px;
+  border-radius: 15px;
+  padding: 10px;
   margin-right: 5px;
   /* background-color: #636da4;  */
   border-bottom-right-radius: 0; /* Adjust corner for self messages */
@@ -294,7 +295,7 @@ body {
   position: relative;
   background-color: white;
   padding: 10px;
-  border-radius: 10px;
+  border-radius: 15px;
   box-shadow: 0px 0px 10px #ccc;
   max-width: 70%;
   text-align: left;
@@ -353,7 +354,7 @@ body {
   cursor: pointer;
   outline: none;
   border: none;
-  height: 39px;
+  height: 40px;
   /* transition: all 0.3s ease-in-out; */
   border-radius: 50%;
   min-width: 0;
@@ -564,6 +565,34 @@ body {
     /* background-color: #d3d3d3; */
     border-right: 0px solid #e0e0e0; /* Subtle border */
   }
+  .chat-messages {
+    margin-top: 70px;
+    margin-bottom: 50px;
+    overflow-y: auto;
+    flex: 1;
+    padding: 20px;
+    border-bottom: #333f80;
+  }
+  
+.chat-input {
+  position: fixed;
+  bottom: 0; /* Adjust as needed */
+  left:0;
+  width: 100%; /* Ensures full width */
+  z-index: 100; /* Ensures it stays on top */
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  border: 2px solid #3f6eb5;
+  border-left: 0px;
+  border-right: 0px;
+  /* border-top: 0px; */
+  border-bottom: 1px solid #e0e0e0;
+  background-color: rgb(245, 242, 242);
+  background-color: #fff;
+  height: 55px;
+}
+
 }
 
   .person-info {
@@ -584,27 +613,23 @@ body {
 }
 
 .chat-input {
-    position: fixed;
-    bottom: 0; /* Adjust as needed */
-    left:0;
-    width: 100%; /* Ensures full width */
-    z-index: 100; /* Ensures it stays on top */
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    border: 2px solid #3f6eb5;
-    border-left: 0px;
-    border-right: 0px;
-    /* border-top: 0px; */
-    border-bottom: 1px solid #e0e0e0;
-    background-color: rgb(245, 242, 242);
-    background-color: #fff;
-    height: 55px;
+  width: 100%; /* Ensures full width */
+  z-index: 100; /* Ensures it stays on top */
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  border: 2px solid #3f6eb5;
+  border-left: 0px;
+  border-right: 0px;
+  /* border-top: 0px; */
+  border-bottom: 1px solid #e0e0e0;
+  background-color: rgb(245, 242, 242);
+  background-color: #fff;
+  height: 55px;
 }
 
   .chat-messages {
       margin-top: 70px;
-      margin-bottom: 35px;
       overflow-y: auto;
       flex: 1;
       padding: 20px;

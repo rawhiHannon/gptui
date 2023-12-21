@@ -262,6 +262,9 @@ const AudioChat = () => {
         {message.user.name === "GPT" && message.id === messages.length && (
           <GptFace isSpeaking={isGptSpeaking && isAudioEnabled} isOnCall={isOnCall} />
         )}
+        {message.user.name === "GPT" && message.id === messages.length && !isGptSpeaking && !isOnCall && (
+          <Avatar sx={{ bgcolor: "gray" }} style={{ width: "20px", height: "20px", marginRight: "10px" }} />
+        )}
         <div className="text">
           {message.text}
           <span className={`message-time ${message.user.name === "rawhi" ? 'me' : 'other'}`}>

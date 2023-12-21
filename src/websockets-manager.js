@@ -124,6 +124,7 @@ self.onWebsocketOpen = function(event, resolve) {
 }
 
 self.handleNewMessage = function(event) {
+  console.log("new message")
   let data = event.data;
   data = data.split(/\r?\n/);
 

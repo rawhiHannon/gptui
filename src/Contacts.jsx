@@ -42,14 +42,14 @@ const Contacts = () => {
 </div>
     <div className="assistant-list">
     <div className="assistant-tab active">
-    <div className="avatar"></div>
+      <Avatar className="avatar" style={{marginRight: '10px'}} />
       <div>
         <span className="assistant-name">Test</span>
         <div className="last-message">Last message...</div>
       </div>
     </div>
     <div className="assistant-tab">
-    <div className="avatar"></div>
+    <Avatar className="avatar" style={{marginRight: '10px'}} />
       <div>
         <span className="assistant-name">Bezeq Support</span>
         <div className="last-message">Last message...</div>
