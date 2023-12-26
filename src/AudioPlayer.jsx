@@ -11,11 +11,22 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
   let isAudioStreaming = false;
   const sourceRef = useRef(null);
   const isPaused = useRef(false);
-  let isSpecialMessagePlaying = false; 
+  let isSpecialMessagePlaying = useRef(false); 
 
   useEffect(() => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      audioContextRef.current = new AudioContext();
+      // Resume audio context on user interaction for iOS compatibility
+      const resumeAudioContext = () => {
+        if (audioContextRef.current.state === "suspended") {
+          audioContextRef.current.resume();
+        }
+        window.removeEventListener('touchend', resumeAudioContext);
+        window.removeEventListener('click', resumeAudioContext);
+      };
+      window.addEventListener('touchend', resumeAudioContext);
+      window.addEventListener('click', resumeAudioContext);
     }
   }, []);
 
@@ -65,20 +76,31 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
     if (isPlaying.current || currentMessageAudioChunks.current.length === 0 || isPaused.current) {
       return;
     }
-  
+
+    // Check and potentially resume the AudioContext state for iOS
+    if (audioContextRef.current.state === "suspended") {
+      audioContextRef.current.resume().then(() => {
+        startAudioPlayback();
+      });
+    } else {
+      startAudioPlayback();
+    }
+  }
+
+  function startAudioPlayback() {
     setIsGptSpeaking(true);
     isPlaying.current = true;
   
     const hasStreamComplete = currentMessageAudioChunks.current[currentMessageAudioChunks.current.length - 1] === "StreamComplete";
     const audioBlobs = hasStreamComplete ? currentMessageAudioChunks.current.slice(0, -1) : [...currentMessageAudioChunks.current];
     currentMessageAudioChunks.current = hasStreamComplete ? ["StreamComplete"] : [];
-  
+
     if (audioBlobs.length === 0) {
       setIsGptSpeaking(false);
       isPlaying.current = false;
       return;
     }
-  
+
     const combinedBlob = new Blob(audioBlobs, { type: 'audio/mpeg' });
     const reader = new FileReader();
     reader.onload = function() {
@@ -87,7 +109,7 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
     };
     reader.readAsArrayBuffer(combinedBlob);
   }
-  
+
   
   function playBuffer(audioBuffer) {
     const source = audioContextRef.current.createBufferSource();
