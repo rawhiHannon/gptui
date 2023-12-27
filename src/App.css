@@ -31,6 +31,11 @@ body {
   outline: none;
 }
 
+.main-container {
+  display: flex;
+  width: 100%;
+}
+
 .chat-container {
   display: flex;
   width: 50vw;
@@ -40,7 +45,7 @@ body {
 }
 
 .sidebar {
-  width: 40vw;
+  width: 20vw;
   max-height: calc(100vh); /* Adjust height as needed, assuming there's a header of 60px */
   background-color: #fff;
   border-right: 0px solid #ccc;

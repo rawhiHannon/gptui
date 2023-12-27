@@ -15,6 +15,8 @@ import AudioStreamer from "./AudioStreamer";
 import useAudioPlayer from './AudioPlayer'; // Adjust the path as per your project structure
 import GptFace from "./GptFace";
 import Contacts from "./Contacts";
+import MenuIcon from '@mui/icons-material/Menu';
+import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 
 const AudioChat = () => {
   const [text, setText] = useState('');
@@ -32,6 +34,11 @@ const AudioChat = () => {
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
   const isAudioEnabledRef = useRef(false);
   const lastMessageTimeRef = useRef(new Date());
+  const [sidebarVisible, setSidebarVisible] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarVisible(!sidebarVisible);
+  };
 
   const handleGptSpeakingChange = (isSpeaking) => {
     setIsGptSpeaking(isSpeaking);
@@ -192,18 +199,25 @@ const AudioChat = () => {
   }
 
   return (
-    <div>
+    <>
+    <div className="main-container">
+      {sidebarVisible && 
+        <div className="sidebar">
+          <Contacts />
+        </div>
+      }
+      <div className="chat-container">
 
-  <div className="chat-container">
-  
-    {/* <div className="sidebar">
-      <Contacts />
-    </div> */}
 
+      <div className="chat">
+      <div className="person-info">
+      {!sidebarVisible ? (
+          <IconButton onClick={toggleSidebar} style={{color: '#3f6eb5', outline: 'none', marginRight: "10px" }}><MenuIcon /></IconButton>
+          ) : (
+          <IconButton onClick={toggleSidebar} style={{color: '#3f6eb5', outline: 'none', marginRight: "10px" }}><MenuOpenIcon /></IconButton>
+      )}
 
-  <div className="chat">
-  <div className="person-info">
-  <Avatar sx={{ bgcolor: "gray" }} style={{ width: "40px", height: "40px", marginRight: "10px" }} />
+      <Avatar sx={{ bgcolor: "gray" }} style={{ width: "40px", height: "40px", marginRight: "10px" }} />
 
     <div className="person-details">
       <h2>Test</h2>
@@ -282,6 +296,7 @@ const AudioChat = () => {
     </div>
     </div>
     </div>
+    </>
   );
 };
 
