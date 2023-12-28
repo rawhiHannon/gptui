@@ -129,7 +129,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 10px;
-  border-bottom: 2px solid #3f6eb5;
+  border-bottom: 0px solid #e0e0e0;
   border-left: 1px solid #e0e0e0;
   border-top: 1px solid #e0e0e0;
   min-height: 50px;

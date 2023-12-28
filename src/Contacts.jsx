@@ -20,7 +20,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-end',
 }));
 
-const Contacts = ({ open, setOpen}) => {
+const Contacts = ({ open, setOpen, agents, currentAgentId, setCurrentAgentId }) => {
   const theme = useTheme();
   // const [open, setOpen] = React.useState(true);
 
@@ -61,24 +61,22 @@ const Contacts = ({ open, setOpen}) => {
           </div>
 
 
-              <div className="assistant-list">
-              <div className="assistant-tab active">
-                <Avatar className="contactAvatar" style={{marginRight: '10px'}} />
+          <div className="assistant-list">
+            {agents.map((agent) => (
+              <div 
+                key={agent.id} 
+                className={`assistant-tab ${currentAgentId == agent.id ? 'active' : ''}`}
+                onClick={() => setCurrentAgentId(agent.id)}
+              >
+                <Avatar className="contactAvatar" src={agent.profile_pic} style={{ marginRight: '10px' }} />
                 <div>
-                  <span className="assistant-name">Test</span>
-                  <div className="last-message">Last message...</div>
+                  <span className="assistant-name">{agent.name}</span>
+                  <div className="last-message">{agent.last_message}</div>
                 </div>
               </div>
-              <div className="assistant-tab">
-              <Avatar className="contactAvatar" style={{marginRight: '10px'}} />
-                <div>
-                  <span className="assistant-name">Bezeq Support</span>
-                  <div className="last-message">Last message...</div>
-                </div>
-              </div>
-              
-              {/* ... more assistant tabs ... */}
-            </div>
+            ))}
+          </div>
+
           </Drawer>
       </Box>
   );

@@ -16,13 +16,11 @@ import useAudioPlayer from './AudioPlayer'; // Adjust the path as per your proje
 import GptFace from "./GptFace";
 import Contacts from "./Contacts";
 import MenuIcon from '@mui/icons-material/Menu';
+import axios from 'axios';
 
 const AudioChat = (handleDrawerOpen) => {
   const [text, setText] = useState('');
-  const [messages, setMessages] = useState(() => {
-    const storedMessages = localStorage.getItem('messages');
-    return storedMessages ? JSON.parse(storedMessages) : [];
-  });
+  const [messages, setMessages] = useState([]);
   const chatMessagesRef = useRef(null);
   const [play] = useSound(boopSfx);
   const [isOnline, setIsOnline] = useState(false);
@@ -34,6 +32,50 @@ const AudioChat = (handleDrawerOpen) => {
   const isAudioEnabledRef = useRef(false);
   const lastMessageTimeRef = useRef(new Date());
   const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [agents, setAgents] = useState([]);
+  const [currentAgentId, setCurrentAgentId] = useState(null);
+  const [currentAgentName, setCurrentAgentName] = useState("");
+
+  useEffect(() => {
+    if(!currentAgentId) {
+      return;
+    }
+    const agentSpecificKey = `messages_${currentAgentId}`;
+    const storedMessages = localStorage.getItem(agentSpecificKey);
+    if (storedMessages) {
+      setMessages(JSON.parse(storedMessages));
+    }
+    localStorage.setItem('currentAgentId', currentAgentId);
+    for(let i in agents) {
+      if(agents[i].id == currentAgentId) {
+        setCurrentAgentName(agents[i].name)
+      }
+    }
+    setSidebarVisible(false)
+  }, [currentAgentId]);
+
+  useEffect(() => {
+    const fetchAgents = async () => {
+      try {
+        const response = await axios.get('http://localhost:7879/api/agents');
+        const fetchedAgents = response.data;
+  
+        setAgents(fetchedAgents);
+  
+        const storedAgentId = localStorage.getItem('currentAgentId');
+        if (storedAgentId && storedAgentId != "null" && storedAgentId != "undefined") {
+          setCurrentAgentId(storedAgentId);
+        } else if (fetchedAgents.length > 0) {
+          setCurrentAgentId(fetchedAgents[0].id);
+          localStorage.setItem('currentAgentId', fetchedAgents[0].id);
+        }
+      } catch (error) {
+        console.error("Error fetching agents:", error);
+      }
+    };
+  
+    fetchAgents();
+  }, []);
 
   const toggleSidebar = () => {
     setSidebarVisible(true);
@@ -76,16 +118,16 @@ const AudioChat = (handleDrawerOpen) => {
     Manager.setWSStatusCallback((status) => {
       setIsOnline(status);
     });
-    const storedMessages = localStorage.getItem('messages');
-    if (storedMessages) {
-      setMessages(JSON.parse(storedMessages));
-    }
   }, []);
 
 
   useEffect(() => {
     chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
-    localStorage.setItem('messages', JSON.stringify(messages));
+    if(!currentAgentId) {
+      return;
+    }
+    const agentSpecificKey = `messages_${currentAgentId}`;
+    localStorage.setItem(agentSpecificKey, JSON.stringify(messages));
   }, [messages]);
 
 
@@ -126,9 +168,9 @@ const AudioChat = (handleDrawerOpen) => {
       text, 
       user: { name: "rawhi", avatar: "r", color: "green" },
       timestamp: timestamp,
-      ms: 0  // Milliseconds elapsed since sending
+      ms: 0 
     };
-    Manager.send(msg.text);
+    Manager.send(msg.text, currentAgentId);
     setMessages([...messages, msg]);
     setText("");
 };
@@ -161,7 +203,8 @@ const AudioChat = (handleDrawerOpen) => {
 
   const clearHistory = () => {
     setMessages([]);
-    localStorage.removeItem('messages');
+    const agentSpecificKey = `messages_${currentAgentId}`;
+    localStorage.removeItem(agentSpecificKey);
     setShowMenu(false);
     lastMessageTimeRef.current = new Date()
   };
@@ -183,7 +226,7 @@ const AudioChat = (handleDrawerOpen) => {
       stop()
       setOnCall(false)
     }
-    Manager.sendStream(base64audio)
+    Manager.sendStream(base64audio, currentAgentId)
   };
 
   const handleStreamStarted = () => {
@@ -194,7 +237,7 @@ const AudioChat = (handleDrawerOpen) => {
 
   const handleAudio = (base64audio, blob) => {
     lastMessageTimeRef.current = new Date()
-    Manager.sendVoice(base64audio)
+    Manager.sendVoice(base64audio, currentAgentId)
   }
 
   return (
@@ -205,6 +248,9 @@ const AudioChat = (handleDrawerOpen) => {
           <Contacts
             open={sidebarVisible}
             setOpen={setSidebarVisible}
+            agents={agents}
+            currentAgentId={currentAgentId}
+            setCurrentAgentId={setCurrentAgentId}
           />
         </div>
       }
@@ -213,17 +259,17 @@ const AudioChat = (handleDrawerOpen) => {
 
       <div className="chat">
       <div className="person-info">
-      <IconButton onClick={toggleSidebar} style={{color: '#3f6eb5', outline: 'none', marginRight: "10px" }}><MenuIcon /></IconButton>
+      <IconButton onClick={toggleSidebar} style={{color: '#3f6eb5', outline: 'none', marginRight: "10px" }} disabled={!isOnline}><MenuIcon /></IconButton>
       <Avatar sx={{ bgcolor: "gray" }} style={{ width: "40px", height: "40px", marginRight: "10px" }} />
 
     <div className="person-details">
-      <h2>Test</h2>
+      <h2>{currentAgentName}</h2>
       {/* Conditionally render the "Online" text */}
       {isOnline && <p>Online</p>}
     </div>
     <div className="icon-container">
     <AudioStreamer 
-      status={isOnline} 
+      status={isOnline && currentAgentId} 
       onAudioStream={handleAudioStream} 
       onStreamStarted={handleStreamStarted}
       toggleAudio={toggleAudio} 
@@ -280,14 +326,14 @@ const AudioChat = (handleDrawerOpen) => {
           onChange={e => setText(e.target.value)}
           placeholder="Type a message"
           onKeyDown={handleKeyDown}
-          disabled={!isOnline}
+          disabled={!isOnline || !currentAgentId}
         />
         {
           text
-            ? <Button onClick={() => sendMessage()} variant="contained">
+            ? <Button onClick={() => sendMessage()} disabled={!isOnline || !currentAgentId} variant="contained">
                 <SendIcon />
               </Button>
-            :  <AudioRecorder onRecordingComplete={handleAudio} status={isOnline} />
+            :  <AudioRecorder onRecordingComplete={handleAudio} status={isOnline && currentAgentId} />
         }
       </div>
     </div>

@@ -173,27 +173,30 @@ self.sendMessageToRoom = function(room) {
   }
 }
 
-self.sendChatMessage = async function(msg) {
+self.sendChatMessage = async function(msg, receiver) {
 await this.ready;
   this.ws.send(JSON.stringify({
     action: 'chat',
-    message: msg
+    message: msg,
+    receiver: receiver
   }));
 }
 
-self.sendStreamMessage = async function(msg) {
+self.sendStreamMessage = async function(msg, receiver) {
   await this.ready;
     this.ws.send(JSON.stringify({
       action: 'stream',
-      audio: msg
+      audio: msg,
+      receiver: receiver
     }));
 }  
 
-self.sendVoiceMessage = async function(msg) {
+self.sendVoiceMessage = async function(msg, receiver) {
   await this.ready;
     this.ws.send(JSON.stringify({
       action: 'voice',
-      audio: msg
+      audio: msg,
+      receiver: receiver
     }));
 }  
 
