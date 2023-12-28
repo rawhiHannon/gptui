@@ -1,64 +1,86 @@
 import React from 'react';
-import TextField from '@mui/material/TextField';
-import InputAdornment from '@mui/material/InputAdornment';
-import SearchIcon from '@mui/icons-material/Search';
-import ArchiveIcon from '@mui/icons-material/Archive';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import SettingsIcon from '@mui/icons-material/Settings';
-import AddIcon from '@mui/icons-material/Add';
-import Avatar from '@mui/material/Avatar';
+import { styled, useTheme } from '@mui/material/styles';
+import Box from '@mui/material/Box';
+import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import Avatar from '@mui/material/Avatar';
+import Typography from '@mui/material/Typography';
+import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 
-const Contacts = () => {
+const drawerWidth = 300;
+
+const DrawerHeader = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  padding: theme.spacing(0, 1),
+  // necessary for content to be below app bar
+  ...theme.mixins.toolbar,
+  justifyContent: 'flex-end',
+}));
+
+const Contacts = ({ open, setOpen}) => {
+  const theme = useTheme();
+  // const [open, setOpen] = React.useState(true);
+
+  const handleDrawerClose = () => {
+    setOpen(false);
+  };
+
   return (
+    <Box sx={{ display: 'flex' }}>
+        <Drawer
+            sx={{
+              width: drawerWidth,
+              flexShrink: 0,
+              '& .MuiDrawer-paper': {
+                width: drawerWidth,
+                boxSizing: 'border-box',
+              },
+            }}
+            variant="persistent"
+            anchor="left"
+            open={open}
+          >
 
-    <>
+          <div className="drawer-header">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <Avatar sx={{ bgcolor: "gray" }} style={{ width: "40px", height: "40px", marginRight: "10px" }} />
+                <Typography variant="h6" style={{ marginRight: "10px" }}>
+                  Customer
+                </Typography>
+              </div>
+              <div>
+                <IconButton onClick={handleDrawerClose} style={{ outline: 'none', color: '#3f6eb5' }}>
+                  {theme.direction === 'ltr' ? <MenuOpenIcon /> : <MenuOpenIcon />}
+                </IconButton>
+              </div>
+            </div>
+          </div>
 
-      <div className="sidebar-header">
-        <Avatar sx={{ bgcolor: "gray" }} style={{ width: "40px", height: "40px", marginRight: "10px" }} />
-    
-        <div className="header-icons">
-          <IconButton style={{ color: '#3f6eb5', outline: 'none' }}><ArchiveIcon /></IconButton>
-          <IconButton style={{ color: '#3f6eb5', outline: 'none' }}><PersonAddIcon /></IconButton>
-          <IconButton style={{ color: '#3f6eb5', outline: 'none' }}><SettingsIcon /></IconButton>
-        </div>
-      </div>
 
-    <div className="search-ph">
-    <TextField
-    className="search-box"
-    variant="standard" 
-    placeholder="Search..."
-    InputProps={{
-      disableUnderline: true,
-      startAdornment: (
-        <InputAdornment position="start">
-          <SearchIcon />
-        </InputAdornment>
-      ),
-    }}
-  />
-
-</div>
-    <div className="assistant-list">
-    <div className="assistant-tab active">
-      <Avatar className="avatar" style={{marginRight: '10px'}} />
-      <div>
-        <span className="assistant-name">Test</span>
-        <div className="last-message">Last message...</div>
-      </div>
-    </div>
-    <div className="assistant-tab">
-    <Avatar className="avatar" style={{marginRight: '10px'}} />
-      <div>
-        <span className="assistant-name">Bezeq Support</span>
-        <div className="last-message">Last message...</div>
-      </div>
-    </div>
-    
-    {/* ... more assistant tabs ... */}
-  </div>
-  </>
+              <div className="assistant-list">
+              <div className="assistant-tab active">
+                <Avatar className="contactAvatar" style={{marginRight: '10px'}} />
+                <div>
+                  <span className="assistant-name">Test</span>
+                  <div className="last-message">Last message...</div>
+                </div>
+              </div>
+              <div className="assistant-tab">
+              <Avatar className="contactAvatar" style={{marginRight: '10px'}} />
+                <div>
+                  <span className="assistant-name">Bezeq Support</span>
+                  <div className="last-message">Last message...</div>
+                </div>
+              </div>
+              
+              {/* ... more assistant tabs ... */}
+            </div>
+          </Drawer>
+      </Box>
   );
 };
 

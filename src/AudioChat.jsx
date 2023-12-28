@@ -16,9 +16,8 @@ import useAudioPlayer from './AudioPlayer'; // Adjust the path as per your proje
 import GptFace from "./GptFace";
 import Contacts from "./Contacts";
 import MenuIcon from '@mui/icons-material/Menu';
-import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 
-const AudioChat = () => {
+const AudioChat = (handleDrawerOpen) => {
   const [text, setText] = useState('');
   const [messages, setMessages] = useState(() => {
     const storedMessages = localStorage.getItem('messages');
@@ -37,7 +36,7 @@ const AudioChat = () => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
 
   const toggleSidebar = () => {
-    setSidebarVisible(!sidebarVisible);
+    setSidebarVisible(true);
   };
 
   const handleGptSpeakingChange = (isSpeaking) => {
@@ -200,10 +199,13 @@ const AudioChat = () => {
 
   return (
     <>
-    <div className="main-container">
+    <div>
       {sidebarVisible && 
         <div className="sidebar">
-          <Contacts />
+          <Contacts
+            open={sidebarVisible}
+            setOpen={setSidebarVisible}
+          />
         </div>
       }
       <div className="chat-container">
@@ -211,12 +213,7 @@ const AudioChat = () => {
 
       <div className="chat">
       <div className="person-info">
-      {!sidebarVisible ? (
-          <IconButton onClick={toggleSidebar} style={{color: '#3f6eb5', outline: 'none', marginRight: "10px" }}><MenuIcon /></IconButton>
-          ) : (
-          <IconButton onClick={toggleSidebar} style={{color: '#3f6eb5', outline: 'none', marginRight: "10px" }}><MenuOpenIcon /></IconButton>
-      )}
-
+      <IconButton onClick={toggleSidebar} style={{color: '#3f6eb5', outline: 'none', marginRight: "10px" }}><MenuIcon /></IconButton>
       <Avatar sx={{ bgcolor: "gray" }} style={{ width: "40px", height: "40px", marginRight: "10px" }} />
 
     <div className="person-details">

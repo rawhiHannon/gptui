@@ -5,13 +5,13 @@ import Chat from "./Chat";
 import AudioChat from "./AudioChat";
 import SpeechRecognition from "./SpeechRecognition";
 
-function ChatApp() {
+function ChatApp(handleDrawerOpen) {
   const [count, setCount] = useState(0)
 
   return (
     <div className="App">
       {/* <Chat /> */}
-      <AudioChat />
+      <AudioChat handleDrawerOpen={handleDrawerOpen} />
       {/* <SpeechRecognition /> */}
     </div>
   )
