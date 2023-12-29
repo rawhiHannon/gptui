@@ -11,7 +11,7 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
   let isAudioStreaming = false;
   const sourceRef = useRef(null);
   const isPaused = useRef(false);
-  let isSpecialMessagePlaying = useRef(false); 
+  let isSpecialMessagePlaying = false; 
 
   useEffect(() => {
     if (!audioContextRef.current) {

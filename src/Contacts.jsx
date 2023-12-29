@@ -2,6 +2,7 @@ import React from 'react';
 import { styled, useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
+import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -59,7 +60,8 @@ const Contacts = ({ open, setOpen, agents, currentAgentId, setCurrentAgentId }) 
               </div>
             </div>
           </div>
-
+          
+          <Divider />
 
           <div className="assistant-list">
             {agents.map((agent) => (
