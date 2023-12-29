@@ -17,6 +17,7 @@ import GptFace from "./GptFace";
 import Contacts from "./Contacts";
 import MenuIcon from '@mui/icons-material/Menu';
 import axios from 'axios';
+import './jarvis.css'
 
 const AudioChat = (handleDrawerOpen) => {
   const [text, setText] = useState('');
@@ -35,6 +36,26 @@ const AudioChat = (handleDrawerOpen) => {
   const [agents, setAgents] = useState([]);
   const [currentAgentId, setCurrentAgentId] = useState(null);
   const [currentAgentName, setCurrentAgentName] = useState("");
+
+  const fetchAgents = async () => {
+    try {
+      const response = await axios.get('http://localhost:7879/api/agents');
+      const fetchedAgents = response.data;
+
+      setAgents(fetchedAgents);
+
+      const storedAgentId = localStorage.getItem('currentAgentId');
+      if (storedAgentId && storedAgentId != "null" && storedAgentId != "undefined") {
+        setCurrentAgentId(storedAgentId);
+      } else if (fetchedAgents.length > 0) {
+        setCurrentAgentId(fetchedAgents[0].id);
+        localStorage.setItem('currentAgentId', fetchedAgents[0].id);
+      }
+    } catch (error) {
+      console.error("Error fetching agents:", error);
+    }
+  };
+
 
   useEffect(() => {
     if(!currentAgentId) {
@@ -55,27 +76,16 @@ const AudioChat = (handleDrawerOpen) => {
   }, [currentAgentId]);
 
   useEffect(() => {
-    const fetchAgents = async () => {
-      try {
-        const response = await axios.get('http://localhost:7879/api/agents');
-        const fetchedAgents = response.data;
-  
-        setAgents(fetchedAgents);
-  
-        const storedAgentId = localStorage.getItem('currentAgentId');
-        if (storedAgentId && storedAgentId != "null" && storedAgentId != "undefined") {
-          setCurrentAgentId(storedAgentId);
-        } else if (fetchedAgents.length > 0) {
-          setCurrentAgentId(fetchedAgents[0].id);
-          localStorage.setItem('currentAgentId', fetchedAgents[0].id);
-        }
-      } catch (error) {
-        console.error("Error fetching agents:", error);
-      }
-    };
-  
     fetchAgents();
   }, []);
+
+  useEffect(() => {
+    if(!isOnline) {
+      return;
+    }
+    fetchAgents();
+  }, [isOnline]);
+
 
   const toggleSidebar = () => {
     setSidebarVisible(true);

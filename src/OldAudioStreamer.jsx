@@ -189,25 +189,16 @@ return (
             </div>
           </>
         ) : null}
-                  {isStreaming ? (
-            <>
-              <div id="main">
-                <div id="myCircle" className={talkingStatus ? 'animate' : ''}>
-                  <div id="mainCircle">
-                    <div className={`circle ${talkingStatus ? 'animate' : ''}`}></div>
-                    <div className={`circle1 ${talkingStatus ? 'animate' : ''}`}></div>
-                    <div id="mainContent">
-                      <h2 id="mainText">Talking</h2>
-                      <ul className={`bars ${talkingStatus ? '' : 'inactive'}`}>
-                        <li className={`${talkingStatus ? 'animate' : ''}`}></li>
-                        <li className={`${talkingStatus ? 'animate' : ''}`}></li>
-                        <li className={`${talkingStatus ? 'animate' : ''}`}></li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <br></br>
+        {isStreaming ? (
+          <>
+            <Avatar className="avatar" />
+            <div className="contact-name">Test</div>
+            <div className="call-time">{formatCallTime()}</div>
+            <div className="audio-waves">
+              {Array(9).fill().map((_, idx) => (
+                <div key={idx} className={`wave ${talkingStatus ? 'animated' : ''}`}></div>
+              ))}
+            </div>
             <div className='buttons-holder'>
               <div onClick={toggleAudio} className="toggle-button">
                 {isAudioEnabled ? <VolumeUpIcon className="icon" /> : <VolumeOffIcon className="icon" />}
@@ -219,9 +210,8 @@ return (
                 <CallEndIcon className="icon" />
               </div>
             </div>
-
-            </>
-          ) : null}
+          </>
+        ) : null}
       </DialogContent>
     </Dialog>
   </div>
