@@ -71,7 +71,7 @@ const Contacts = ({ open, setOpen, agents, currentAgentId, setCurrentAgentId }) 
                 <Avatar className="contactAvatar" src={agent.profile_pic} style={{ marginRight: '10px' }} />
                 <div>
                   <span className="assistant-name">{agent.name}</span>
-                  <div className="last-message">{agent.last_message}</div>
+                  <div className="last-message">{agent.message}</div>
                 </div>
               </div>
             ))}
