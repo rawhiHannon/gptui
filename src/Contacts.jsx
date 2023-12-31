@@ -49,7 +49,7 @@ const Contacts = ({ open, setOpen, agents, currentAgentId, setCurrentAgentId }) 
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
               <div style={{ display: "flex", alignItems: "center" }}>
                 <Avatar sx={{ bgcolor: "gray" }} style={{ width: "40px", height: "40px", marginRight: "10px" }} />
-                <Typography variant="h6" style={{ marginRight: "10px" }}>
+                <Typography variant="h6" style={{ marginRight: "10px", color: "#000" }}>
                   Customer
                 </Typography>
               </div>
