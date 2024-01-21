@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import useSound from 'use-sound';
 import boopSfx from './interface-124464.mp3';
 import voicecall from './phone-call.mp3';
@@ -15,7 +15,15 @@ import { Mic, Phone } from '@mui/icons-material';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 
-const AudioStreamer = ({ onAudioStream, onStreamStarted, toggleAudio, status, talkingStatus, isAudioEnabled }) => {
+const AudioStreamer = forwardRef(({
+  onAudioStream, 
+  onStreamStarted, 
+  toggleAudio, 
+  status, 
+  talkingStatus, 
+  isAudioEnabled
+}, ref) => {
+  
   const [isStreaming, setIsStreaming] = useState(false);
   const [callTime, setCallTime] = useState(0);
   const callTimerRef = useRef(null);
@@ -23,7 +31,7 @@ const AudioStreamer = ({ onAudioStream, onStreamStarted, toggleAudio, status, ta
   const [play] = useSound(boopSfx);
   const [isMicOn, setIsMicOn] = useState(true);
   const [isDialing, setIsDialing] = useState(false);
-  const [playDialingSound] = useSound(voicecall);
+  const [playDialingSound, { stop: stopDialingSound }] = useSound(voicecall);
   const numberOfRings = 3;
   const dialingTimeoutRef = useRef(null); // Ref to store dialing timeouts
   const [shouldShowDialog, setShouldShowDialog] = useState(false); // New state
@@ -137,6 +145,7 @@ const AudioStreamer = ({ onAudioStream, onStreamStarted, toggleAudio, status, ta
 
 const closeDialog = () => {
   callManuallyTerminated = true;
+  stopDialingSound()
   document.getElementById('dialogContent').classList.add('dialog-fade-out');
   if (isStreaming) {
     stopStreaming();
@@ -163,6 +172,10 @@ const toggleMic = () => {
   setIsMicOn(!isMicOn);
   // Additional logic to actually enable/disable the mic can be added here
 };
+
+useImperativeHandle(ref, () => ({
+  closeDialog,
+}));
 
 
 return (
@@ -226,6 +239,6 @@ return (
     </Dialog>
   </div>
 );
-};
+});
 
 export default AudioStreamer;

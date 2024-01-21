@@ -11,7 +11,7 @@ import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import IconButton from '@mui/material/IconButton';
 import AudioRecorder from './AudioRecorder';
 import SpeechRecognition from './SpeechRecognition'
-import AudioStreamer from "./PCMAudioStreamer";
+import AudioStreamer from "./AudioStreamer";
 import useAudioPlayer from './AudioPlayer'; // Adjust the path as per your project structure
 import GptFace from "./GptFace";
 import Contacts from "./Contacts";
@@ -93,6 +93,11 @@ const AudioChat = (handleDrawerOpen) => {
 
   useEffect(() => {
     if(!isOnline) {
+      if(isOnCall) {
+        try  {
+          handleCloseDialog()
+        } catch(e) {}
+      }
       return;
     }
     fetchAgents();

@@ -84,7 +84,7 @@ const AudioStreamer = forwardRef(({
               recorderType: StereoAudioRecorder,
               mimeType: 'audio/wav',
               numberOfAudioChannels: 1,
-              desiredSampRate: 16000,
+              desiredSampRate: 48000,
               timeSlice: 200,
               ondataavailable: handleDataAvailable,
           });
