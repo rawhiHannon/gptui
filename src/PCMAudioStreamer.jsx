@@ -164,6 +164,14 @@ const toggleMic = () => {
   // Additional logic to actually enable/disable the mic can be added here
 };
 
+useEffect(() => {
+  return () => {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+          mediaRecorderRef.current.stopRecording();
+      }
+  };
+}, []);
+
 useImperativeHandle(ref, () => ({
   closeDialog,
 }));

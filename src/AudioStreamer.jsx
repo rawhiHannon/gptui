@@ -101,9 +101,12 @@ const AudioStreamer = forwardRef(({
           onAudioStream("CloseStream");
           setIsStreaming(false);
           mediaRecorderRef.current.stop();
+          try {
+            mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+          } catch(e) {}
       }
-  };
-  
+    };
+
 
   useEffect(() => {
       return () => {
