@@ -11,7 +11,7 @@ import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import IconButton from '@mui/material/IconButton';
 import AudioRecorder from './AudioRecorder';
 import SpeechRecognition from './SpeechRecognition'
-import AudioStreamer from "./AudioStreamer";
+import AudioStreamer from "./PCMAudioStreamer";
 import useAudioPlayer from './AudioPlayer'; // Adjust the path as per your project structure
 import GptFace from "./GptFace";
 import Contacts from "./Contacts";
@@ -36,6 +36,15 @@ const AudioChat = (handleDrawerOpen) => {
   const [agents, setAgents] = useState([]);
   const [currentAgentId, setCurrentAgentId] = useState(null);
   const [currentAgentName, setCurrentAgentName] = useState("");
+  const audioStreamerRef = useRef();
+
+  const handleCloseDialog = () => {
+      if (audioStreamerRef.current) {
+          audioStreamerRef.current.closeDialog();
+      } else {
+        alert("nil!!!")
+      }
+  };
 
   const fetchAgents = async () => {
     try {
@@ -167,6 +176,9 @@ const AudioChat = (handleDrawerOpen) => {
       }]);
     } else if (message.stream) {
       if(isAudioEnabledRef.current) {
+        if(message.stream === "<close_stream>") {
+          handleCloseDialog();
+        }
         addAudioToQueue(message.stream);
       }
     }
@@ -288,6 +300,7 @@ const AudioChat = (handleDrawerOpen) => {
       toggleAudio={toggleAudio} 
       talkingStatus={isGptSpeaking} 
       isAudioEnabled={isAudioEnabled} 
+      ref={audioStreamerRef}
     />
 
     <div className="speaker-icon-container">
