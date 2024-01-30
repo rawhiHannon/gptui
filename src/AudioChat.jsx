@@ -183,8 +183,9 @@ const AudioChat = (handleDrawerOpen) => {
       if(isAudioEnabledRef.current) {
         if(message.stream === "<close_stream>") {
           handleCloseDialog();
+        } else {
+          addAudioToQueue(message.stream);
         }
-        addAudioToQueue(message.stream);
       }
     }
   };
@@ -200,6 +201,7 @@ const AudioChat = (handleDrawerOpen) => {
       timestamp: timestamp,
       ms: 0 
     };
+    pauseAudio(false)
     Manager.send(msg.text, currentAgentId);
     setMessages([...messages, msg]);
     setText("");
@@ -248,11 +250,11 @@ const AudioChat = (handleDrawerOpen) => {
   };
 
   const handleAudioStream = (base64audio) => {
-    if(base64audio === "start") {
+    if(base64audio === "<start>") {
       pauseAudio();
       setOnCall(true)
     }
-    if(base64audio === "CloseStream") {
+    if(base64audio === "<close_stream>") {
       stop()
       setOnCall(false)
     }

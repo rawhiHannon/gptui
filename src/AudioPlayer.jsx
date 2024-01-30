@@ -46,8 +46,12 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
     }
   }, [isGptSpeaking, onGptSpeakingChange]);
   
-  const pauseAudio = () => {
-    isPaused.current = true;
+  const pauseAudio = (paused) => {
+    let state = true;
+    if(paused === false) {
+      state = false
+    } 
+    isPaused.current = state;
   };
 
   const playAudio = () => {
@@ -159,13 +163,19 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
   }
   
   const base64ToBlob = (base64, contentType) => {
-    const binaryString = window.atob(base64);
-    const byteNumbers = new Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      byteNumbers[i] = binaryString.charCodeAt(i);
+    try {
+      const binaryString = window.atob(base64);
+      const byteNumbers = new Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        byteNumbers[i] = binaryString.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      return new Blob([byteArray], { type: contentType });
+    } catch (e) {
+      console.log(base64)
+      return new Blob([], { type: contentType });
     }
-    const byteArray = new Uint8Array(byteNumbers);
-    return new Blob([byteArray], { type: contentType });
+
   };
 
   const addAudioToQueue  = (stream) => {

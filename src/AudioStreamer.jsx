@@ -98,7 +98,6 @@ const AudioStreamer = forwardRef(({
 
     const stopStreaming = () => {
       if (mediaRecorderRef.current) {
-          onAudioStream("CloseStream");
           setIsStreaming(false);
           mediaRecorderRef.current.stop();
           try {
@@ -119,7 +118,7 @@ const AudioStreamer = forwardRef(({
   const startDialing = () => {
     setIsDialing(true);
     callManuallyTerminated = false;
-    onAudioStream("start");
+    onAudioStream("<start>");
     playRingSound(1);
   };
 
@@ -147,15 +146,20 @@ const AudioStreamer = forwardRef(({
 
 
 const closeDialog = () => {
-  callManuallyTerminated = true;
-  stopDialingSound()
-  document.getElementById('dialogContent').classList.add('dialog-fade-out');
-  if (isStreaming) {
-    stopStreaming();
-  }
-  setShouldShowDialog(false);
-  setIsDialing(false);
-  clearTimeout(dialingTimeoutRef.current);
+    try {
+      document.getElementById('dialogContent').classList.add('dialog-fade-out');
+    } catch(e) {
+    }
+    
+    callManuallyTerminated = true;
+    stopDialingSound()
+    onAudioStream("<close_stream>");
+    if (isStreaming) {
+      stopStreaming();
+    }
+    setShouldShowDialog(false);
+    setIsDialing(false);
+    clearTimeout(dialingTimeoutRef.current);
 };
 
 const preventDialogClose = (event, reason) => {
