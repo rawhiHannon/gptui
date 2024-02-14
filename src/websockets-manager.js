@@ -148,7 +148,7 @@ self.handleNewMessage = function(event) {
 }
 
 self.handleStreamMessage = function(msg) {
-this.manager.handleSocketMessage(msg.action, msg.target, msg.message);
+  this.manager.handleSocketMessage(msg.action, msg.target, msg.message);
 }
 
 self.handleEventMessage = function(msg) {
@@ -156,57 +156,68 @@ self.handleEventMessage = function(msg) {
 }
 
 self.handleChatMessage = function(msg) {
-this.manager.handleSocketMessage(msg.action, msg.target, msg.message);
-}
-
-self.sendMessageToRoom = function(room) {
-  if (room.newMessage !== "") {
-    this.ws.send(JSON.stringify({
-      action: 'message',
-      message: room.newMessage,
-      target: {
-        id: room.id,
-        name: room.name
-      }
-    }));
-    room.newMessage = "";
-  }
+  this.manager.handleSocketMessage(msg.action, msg.target, msg.message);
 }
 
 self.sendChatMessage = async function(msg, receiver) {
-await this.ready;
+  await this.ready;
+  const receiverId = parseInt(receiver, 10);
   this.ws.send(JSON.stringify({
     action: 'chat',
     message: msg,
-    receiver: receiver
+    receiver: receiverId
   }));
 }
 
 self.sendStreamMessage = async function(msg, receiver) {
   await this.ready;
-    this.ws.send(JSON.stringify({
-      action: 'stream',
-      audio: msg,
-      receiver: receiver
-    }));
-}  
+  const receiverId = parseInt(receiver, 10);
+  this.ws.send(JSON.stringify({
+    action: 'stream',
+    audio: msg,
+    receiver: receiverId
+  }));
+}
 
 self.sendVoiceMessage = async function(msg, receiver) {
   await this.ready;
-    this.ws.send(JSON.stringify({
-      action: 'voice',
-      audio: msg,
-      receiver: receiver
-    }));
+  this.ws.send(JSON.stringify({
+    action: 'voice',
+    audio: msg,
+    receiver: receiver
+  }));
 }  
 
 self.sendSettingsMessage = async function(data) {
-await this.ready;
-this.ws.send(JSON.stringify({
-  action: 'settings',
-  data: {figure_id: 1}
-}));
+  await this.ready;
+  this.ws.send(JSON.stringify({
+    action: 'settings',
+    data: {figure_id: 1}
+  }));
 }
+
+self.sendStreamBytes = async function(blob, receiverIdStr) {
+  await this.ready;
+  const receiverId = parseInt(receiverIdStr, 10);
+
+  blob.arrayBuffer().then(audioBuffer => {
+      const receiverBuffer = new ArrayBuffer(4);
+      const receiverView = new DataView(receiverBuffer);
+      receiverView.setInt32(0, receiverId, true);
+
+      const combinedBuffer = concatenateBuffers(receiverBuffer, audioBuffer);
+      this.ws.send(combinedBuffer);
+  });
+};
+
+function concatenateBuffers(buffer1, buffer2) {
+  const combined = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
+  combined.set(new Uint8Array(buffer1), 0);
+  combined.set(new Uint8Array(buffer2), buffer1.byteLength);
+  return combined.buffer;
+}
+
+
 
 self.findRoom = function(roomId) {
   for (let i = 0; i < this.rooms.length; i++) {

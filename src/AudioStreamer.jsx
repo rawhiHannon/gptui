@@ -32,7 +32,7 @@ const AudioStreamer = forwardRef(({
   const [isMicOn, setIsMicOn] = useState(true);
   const [isDialing, setIsDialing] = useState(false);
   const [playDialingSound, { stop: stopDialingSound }] = useSound(voicecall);
-  const numberOfRings = 3;
+  const numberOfRings = 1;
   const dialingTimeoutRef = useRef(null); // Ref to store dialing timeouts
   const [shouldShowDialog, setShouldShowDialog] = useState(false); // New state
   let callManuallyTerminated = false;
@@ -68,12 +68,14 @@ const AudioStreamer = forwardRef(({
 
     const handleDataAvailable = (event) => {
         if (event.data.size > 0) {
-            const reader = new FileReader();
-            reader.readAsDataURL(event.data);
-            reader.onloadend = () => {
-                const base64AudioMessage = reader.result.split(',')[1];
-                onAudioStream(base64AudioMessage);
-            };
+            onAudioStream(event.data);
+
+            // const reader = new FileReader();
+            // reader.readAsDataURL(event.data);
+            // reader.onloadend = () => {
+            //     const base64AudioMessage = reader.result.split(',')[1];
+            //     onAudioStream(base64AudioMessage);
+            // };
         }
     };
 
@@ -118,7 +120,7 @@ const AudioStreamer = forwardRef(({
   const startDialing = () => {
     setIsDialing(true);
     callManuallyTerminated = false;
-    onAudioStream("<start>");
+    onAudioStream("<start_stream>");
     playRingSound(1);
   };
 

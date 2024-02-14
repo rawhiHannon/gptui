@@ -249,16 +249,20 @@ const AudioChat = (handleDrawerOpen) => {
     localStorage.setItem("audio", ""+isAudioEnabledRef.current)
   };
 
-  const handleAudioStream = (base64audio) => {
-    if(base64audio === "<start>") {
+  const handleAudioStream = (data) => {
+    if(data === "<start_stream>") {
       pauseAudio();
       setOnCall(true)
+      Manager.sendStream(data, currentAgentId)
+      return
     }
-    if(base64audio === "<close_stream>") {
+    if(data === "<close_stream>") {
       stop()
       setOnCall(false)
+      Manager.sendStream(data, currentAgentId)
+      return
     }
-    Manager.sendStream(base64audio, currentAgentId)
+    Manager.sendStreamBytes(data, currentAgentId)
   };
 
   const handleStreamStarted = () => {

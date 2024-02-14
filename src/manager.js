@@ -21,6 +21,9 @@ class Manager {
     WebSocketsManager.sendVoiceMessage(message, receiver);
   }
 
+  sendStreamBytes(bytes, receiver) {
+    WebSocketsManager.sendStreamBytes(bytes, receiver);
+  }
 
   registerChatHandler(handler) {
     this.chatHandler = handler;
