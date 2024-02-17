@@ -37,6 +37,14 @@ const AudioChat = (handleDrawerOpen) => {
   const [currentAgentId, setCurrentAgentId] = useState(null);
   const [currentAgentName, setCurrentAgentName] = useState("");
   const audioStreamerRef = useRef();
+  const [isOtherSideTyping, setIsOtherSideTyping] = useState(false);
+
+  const handleOtherSideTyping = () => {
+    setIsOtherSideTyping(true);
+    setTimeout(() => {
+      setIsOtherSideTyping(false);
+    }, 5000);
+  };
 
   const handleCloseDialog = () => {
       if (audioStreamerRef.current) {
@@ -170,6 +178,7 @@ const AudioChat = (handleDrawerOpen) => {
         ms: msElapsed
       }]);
     } else if (message.text) {
+      setIsOtherSideTyping(false);
       const now = new Date();
       const msElapsed = now.getTime() - lastMessageTimeRef.current.getTime();
       setMessages(messages => [...messages, {
@@ -205,6 +214,7 @@ const AudioChat = (handleDrawerOpen) => {
     Manager.send(msg.text, currentAgentId);
     setMessages([...messages, msg]);
     setText("");
+    handleOtherSideTyping();
 };
 
   const sendTextMessage = (textData) => {
@@ -353,6 +363,18 @@ const AudioChat = (handleDrawerOpen) => {
         </div>
       </div>
     ))}
+
+    {isOtherSideTyping && (
+      <div className={`message other`}>
+          <div className="typing">
+            <div className="dot-container">
+              <div className="dot"></div>
+              <div className="dot"></div>
+              <div className="dot"></div>
+            </div>
+          </div>
+        </div>
+    )}
 
       </div>
       <div className="chat-input">
