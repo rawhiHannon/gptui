@@ -36,8 +36,8 @@ async function sha256(str) {
 
 function WebSocketsManager() {
   this.ws = null;
-  // this.serverUrl = "wss://www.metesapi.com/api/ws";
-  this.serverUrl = "ws://localhost:7879/api/ws";
+  this.serverUrl = "wss://www.metesapi.com/api/ws";
+  // this.serverUrl = "ws://localhost:7879/api/ws";
   this.roomInput = null;
   this.rooms = [];
   this.manager = null;
