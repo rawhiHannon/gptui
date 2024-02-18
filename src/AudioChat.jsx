@@ -276,9 +276,7 @@ const AudioChat = (handleDrawerOpen) => {
   };
 
   const handleStreamStarted = () => {
-    setTimeout(() => {
-      playAudio();
-    }, 1300);
+    playAudio();
   }
 
   const handleAudio = (base64audio, blob) => {
