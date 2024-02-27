@@ -35,6 +35,7 @@ const AudioChat = (handleDrawerOpen) => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [agents, setAgents] = useState([]);
   const [currentAgentId, setCurrentAgentId] = useState(null);
+  const currentAgentIdRef = useRef(currentAgentId);
   const [currentAgentName, setCurrentAgentName] = useState("");
   const audioStreamerRef = useRef();
   const [isOtherSideTyping, setIsOtherSideTyping] = useState(false);
@@ -76,6 +77,7 @@ const AudioChat = (handleDrawerOpen) => {
 
 
   useEffect(() => {
+    currentAgentIdRef.current = currentAgentId;
     if(!currentAgentId) {
       return;
     }
@@ -119,13 +121,6 @@ const AudioChat = (handleDrawerOpen) => {
   const handleGptSpeakingChange = (isSpeaking) => {
     setIsGptSpeaking(isSpeaking);
   };
-
-  const {
-    addAudioToQueue,
-    stop,
-    pauseAudio,
-    playAudio,
-  } = useAudioPlayer(handleGptSpeakingChange, isAudioEnabledRef);
 
   useEffect(() => {
     const audioSetting = localStorage.getItem("audio") === "true";
@@ -259,6 +254,13 @@ const AudioChat = (handleDrawerOpen) => {
     localStorage.setItem("audio", ""+isAudioEnabledRef.current)
   };
 
+  const closeStream = () => {
+    stop()
+    setOnCall(false)
+    Manager.sendStream("<close_stream>", currentAgentIdRef.current)
+    return
+  };
+
   const handleAudioStream = (data) => {
     if(data === "<start_stream>") {
       pauseAudio();
@@ -276,13 +278,20 @@ const AudioChat = (handleDrawerOpen) => {
   };
 
   const handleStreamStarted = () => {
-    playAudio();
+    setTimeout(playAudio, 1300);
   }
 
   const handleAudio = (base64audio, blob) => {
     lastMessageTimeRef.current = new Date()
     Manager.sendVoice(base64audio, currentAgentId)
   }
+
+  const {
+    addAudioToQueue,
+    stop,
+    pauseAudio,
+    playAudio,
+  } = useAudioPlayer(handleGptSpeakingChange, isAudioEnabledRef, closeStream);
 
   return (
     <>

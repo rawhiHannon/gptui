@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 
-const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
+const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef, onStreamComplete) => {
   const audioQueue = useRef([]);
   const currentMessageAudioChunks = useRef([]);
   const historyMessageAudioChunks = useRef([]);
+  const streamCompleted = useRef(false);
   const isProcessingAudio = useRef(false);
   const [isGptSpeaking, setIsGptSpeaking] = useState(false);
   const audioContextRef = useRef(null);
@@ -11,7 +12,8 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
   let isAudioStreaming = false;
   const sourceRef = useRef(null);
   const isPaused = useRef(false);
-  let isSpecialMessagePlaying = false; 
+  let isSpecialMessagePlaying = false;
+
 
   useEffect(() => {
     if (!audioContextRef.current) {
@@ -75,10 +77,7 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
   };
   
   function playNextAudioChunk() {
-    if (isPlaying.current || currentMessageAudioChunks.current.length === 0 || isPaused.current) {
-      // alert(currentMessageAudioChunks.current.length)
-      // alert(isPaused.current)
-      console.log("will not play", isPlaying.current == null, currentMessageAudioChunks.current.length === 0, isPaused.current)
+    if (isPlaying.current || isPaused.current) {
       return;
     }
 
@@ -99,6 +98,18 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
     if (audioBlobs.length === 0) {
       setIsGptSpeaking(false);
       isPlaying.current = false;
+      if(streamCompleted.current == true) {
+        if(onStreamComplete) {
+          onStreamComplete()
+        }
+      }
+      return;
+    }
+
+    if(audioBlobs.length == 1 && audioBlobs[0] == "<stream_complete>") {
+      if(onDone) {
+        onDone();
+      }
       return;
     }
 
@@ -189,6 +200,7 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
       stop();
       isSpecialMessagePlaying = true;
       currentMessageAudioChunks.current = [audioBlob];
+      streamCompleted.current = false;
       playNextAudioChunk();
       return;
     }
@@ -196,26 +208,19 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef) => {
       stop();
       return;
     }
-    if (stream === "StreamComplete") {
-        isAudioStreaming = false;
-        audioQueue.current.push([...historyMessageAudioChunks.current]);
-        historyMessageAudioChunks.current = [];
-        historyMessageAudioChunks.current.push(stream);
-        if (!isProcessingAudio.current) {
-          // processAudioQueue();
-        }
+    if (stream === "<stream_complete>") {
+      streamCompleted.current = true;
     } else {
         if(!isAudioEnabledRef.current) {
           return
         }
         if (!isAudioStreaming) {
           isAudioStreaming = true;
-          historyMessageAudioChunks.current = [];
         }
+        streamCompleted.current = false;
 
         const audioBlob = base64ToBlob(stream, 'audio/mpeg');
         currentMessageAudioChunks.current.push(audioBlob);
-        historyMessageAudioChunks.current.push(audioBlob);
 
         if (isPlaying.current == false) {
           playNextAudioChunk();
