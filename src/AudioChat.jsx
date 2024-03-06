@@ -57,8 +57,8 @@ const AudioChat = (handleDrawerOpen) => {
 
   const fetchAgents = async () => {
     try {
-      const response = await axios.get('https://www.metesapi.com/api/agents');
-      // const response = await axios.get('http://localhost:7879/api/agents');
+      // const response = await axios.get('https://www.metesapi.com/api/agents');
+      const response = await axios.get('http://localhost:7879/api/agents');
       const fetchedAgents = response.data;
 
       setAgents(fetchedAgents);

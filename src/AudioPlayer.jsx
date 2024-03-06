@@ -12,6 +12,7 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef, onStreamComplete
   let isAudioStreaming = false;
   const sourceRef = useRef(null);
   const isPaused = useRef(false);
+  const activeSources = useRef([]);
   let isSpecialMessagePlaying = false;
 
 
@@ -61,21 +62,6 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef, onStreamComplete
     playNextAudioChunk();
   };
 
-
-  const processAudioQueue = () => {
-    if (audioQueue.current.length > 0 && !isProcessingAudio.current) {
-      isProcessingAudio.current = true;
-      const currentMessageChunks = audioQueue.current.shift();
-      const combinedBlob = new Blob(currentMessageChunks, { type: 'audio/mpeg' });
-      const audioUrl = URL.createObjectURL(combinedBlob);
-      setMessages(messages => [...messages, { id: messages.length + 1, audioUrl, user: { name: "GPT", avatar: "gpt", color: "maroon" } }]);
-      isProcessingAudio.current = false;
-      if (audioQueue.current.length > 0) {
-        processAudioQueue();
-      }
-    }
-  };
-  
   function playNextAudioChunk() {
     if (isPlaying.current || isPaused.current) {
       return;
@@ -92,10 +78,7 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef, onStreamComplete
   }
 
   function startAudioPlayback() {
-    const audioBlobs = [...currentMessageAudioChunks.current];
-    currentMessageAudioChunks.current = [];
-
-    if (audioBlobs.length === 0) {
+    if (currentMessageAudioChunks.current.length === 0) {
       setIsGptSpeaking(false);
       isPlaying.current = false;
       if(streamCompleted.current == true) {
@@ -106,17 +89,12 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef, onStreamComplete
       return;
     }
 
-    if(audioBlobs.length == 1 && audioBlobs[0] == "<stream_complete>") {
-      if(onDone) {
-        onDone();
-      }
-      return;
-    }
-
     setIsGptSpeaking(true);
     isPlaying.current = true;
 
-    const combinedBlob = new Blob(audioBlobs, { type: 'audio/mpeg' });
+    const combinedBlob = new Blob([...currentMessageAudioChunks.current], { type: 'audio/mpeg' });
+    currentMessageAudioChunks.current = [];
+
     const reader = new FileReader();
     reader.onload = function() {
       const arrayBuffer = this.result;
@@ -132,31 +110,26 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef, onStreamComplete
       source.buffer = audioBuffer;
       source.connect(audioContextRef.current.destination);
       source.start();
-      sourceRef.current = source;
+      activeSources.current.push(source);
   
       source.onended = () => {
         isPlaying.current = false;
         setIsGptSpeaking(false);
         isSpecialMessagePlaying = false;
+        activeSources.current = activeSources.current.filter(s => s !== source);
         playNextAudioChunk();
       };
     });
   }
   
   const stop = () => {
-    // if (isSpecialMessagePlaying) {
-    //   return;
-    // }
     // Stop the current audio source if it's playing
-    if (sourceRef.current) {
-      sourceRef.current.stop();
-      sourceRef.current = null;
-    }
+    activeSources.current.forEach(source => source.stop());
+    activeSources.current = []; // Clear the list of active sources.
 
     // Clear the audio queues
     audioQueue.current = [];
     currentMessageAudioChunks.current = [];
-    historyMessageAudioChunks.current = [];
 
     // Reset states
     isPlaying.current = false;
@@ -204,7 +177,7 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef, onStreamComplete
       playNextAudioChunk();
       return;
     }
-    if (stream === "<CANCEL>") {
+    if (stream === "<cancel>") {
       stop();
       return;
     }
@@ -214,15 +187,11 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef, onStreamComplete
         if(!isAudioEnabledRef.current) {
           return
         }
-        if (!isAudioStreaming) {
-          isAudioStreaming = true;
-        }
         streamCompleted.current = false;
-
         const audioBlob = base64ToBlob(stream, 'audio/mpeg');
         currentMessageAudioChunks.current.push(audioBlob);
 
-        if (isPlaying.current == false) {
+        if (isPlaying.current == false && isPaused.current == false) {
           playNextAudioChunk();
         }
       }
