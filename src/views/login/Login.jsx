@@ -1,11 +1,8 @@
 import React, { Component } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
-import { Container, Row, Col, Form, Button } from 'react-bootstrap'; // Assuming you're using Bootstrap for styling
 
 import Auth from "../../controllers/auth";
 // import Footer from "components/Footer/Footer";
-import CustomButton from "../../components/CustomButton/CustomButton.jsx";
-import AlertDismissible from "../../components/AlertDismissible/AlertDismissible.jsx";
 
 import logo from "../../assets/logo.png";
 

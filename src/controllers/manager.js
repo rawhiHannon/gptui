@@ -1,4 +1,6 @@
+import auth from "./auth";
 import WebSocketsManager from "./websockets-manager";
+import apiConfig from './variables/api';
 
 class Manager {
   constructor() {
@@ -57,7 +59,7 @@ class Manager {
 
   authorize(username, password) {
     let accessKey = this.generateAccessKey(username, 0, password);
-    return fetch("http://localhost:7878/api/authorization", {
+    return fetch(`${apiConfig.apiHost}/authorization`, {
       method: "post",
       headers: {
         Accept: "application/json",

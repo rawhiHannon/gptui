@@ -19,6 +19,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import axios from 'axios';
 import apiConfig from '../../controllers/variables/api';
 import './jarvis.css'
+import Auth from "../../controllers/auth";
+import { useNavigate } from 'react-router-dom';
 
 const AudioChat = (handleDrawerOpen) => {
   const [text, setText] = useState('');
@@ -40,6 +42,14 @@ const AudioChat = (handleDrawerOpen) => {
   const [currentAgentName, setCurrentAgentName] = useState("");
   const audioStreamerRef = useRef();
   const [isOtherSideTyping, setIsOtherSideTyping] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!Auth.isAuthenticated) {
+      navigate('/login', { replace: true });
+    }
+  }, [Auth.isAuthenticated]);
+
 
   const handleOtherSideTyping = () => {
     setIsOtherSideTyping(true);
@@ -51,8 +61,6 @@ const AudioChat = (handleDrawerOpen) => {
   const handleCloseDialog = () => {
       if (audioStreamerRef.current) {
           audioStreamerRef.current.closeDialog();
-      } else {
-        alert("nil!!!")
       }
   };
 
@@ -246,6 +254,11 @@ const AudioChat = (handleDrawerOpen) => {
     lastMessageTimeRef.current = new Date()
   };
 
+  const signout = () => {
+    Auth.signout()
+    setShowMenu(false);
+  };
+
   const toggleAudio = (event) => {
     event.stopPropagation();
     isAudioEnabledRef.current = !isAudioEnabledRef.current
@@ -345,6 +358,7 @@ const AudioChat = (handleDrawerOpen) => {
         <div ref={menuRef} className="menu">
           <div className="menu-item" onClick={clearHistory}>Clear History</div>
           <div className="menu-item">Settings</div>
+          <div className="menu-item" onClick={signout}>Sign out</div>
         </div>
       )}
     </div>
