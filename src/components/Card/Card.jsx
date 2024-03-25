@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import Loader from "react-loader-spinner";
-import { Dropdown } from "reactjs-dropdown-component";
-import NoDataIcon from '@material-ui/icons/BlurOn';
+import { Audio } from 'react-loader-spinner';
+import { Select } from "react-dropdown-select";
+import NoDataIcon from '@mui/icons-material/BlurOn';
 
 
 export class Card extends Component {
@@ -26,7 +26,7 @@ export class Card extends Component {
     let type = bars ? "Audio" : "Oval";
     return (
       <div style={{ display: "flex", justifyContent: "center"}}>
-        <Loader
+        <Audio
           type={type}
           color="#00BFFF"
           height="120"
@@ -87,7 +87,7 @@ export class Card extends Component {
           margin: "10px"
         }}
       >
-        <Dropdown
+        <Select
           title={this.props.dropdownlistTitle}
           list={this.props.dropdownlistData}
           resetThenSet={this.props.dropdownlistHandler}

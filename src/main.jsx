@@ -1,12 +1,31 @@
 import React from 'react'
-import ReactDOM from 'react-dom/client'
-import ChatApp from './ChatApp'
-// import Chat from './Chat'
+import { createRoot } from 'react-dom/client';
+import {HashRouter, Route, Routes} from "react-router-dom";
+
 import './index.css'
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    {/* <Chat /> */}
-    <ChatApp />
-  </React.StrictMode>,
-)
+import indexRoutes from "./routes/index.jsx";
+import PrivateRoute from "./components/PrivateRoute/PrivateRoute.jsx";
+
+const container = document.getElementById('root');
+const root = createRoot(container);
+
+root.render(
+  <HashRouter>
+    <Routes>
+      {indexRoutes.map((prop, key) => (
+        <Route
+          key={key}
+          path={prop.path}
+          element={
+            prop.protected ? (
+              <PrivateRoute component={prop.component} />
+            ) : (
+              <prop.component />
+            )
+          }
+        />
+      ))}
+    </Routes>
+  </HashRouter>
+);

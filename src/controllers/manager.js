@@ -50,6 +50,24 @@ class Manager {
       this.chatHandler(message);
     }
   }
+
+  generateAccessKey(username, time, password) {
+    return password;
+  }
+
+  authorize(username, password) {
+    let accessKey = this.generateAccessKey(username, 0, password);
+    return fetch("http://localhost:7878/api/authorization", {
+      method: "post",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ username, accessKey })
+    }).then(response => {
+      return response.json();
+    });
+  }
 }
 
 const manager = new Manager();

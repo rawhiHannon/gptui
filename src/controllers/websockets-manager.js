@@ -1,3 +1,5 @@
+import apiConfig from './variables/api';
+
 async function generateUniqueKey() {
   const localStorageKey = 'uniqueDeviceKey';
 
@@ -36,8 +38,7 @@ async function sha256(str) {
 
 function WebSocketsManager() {
   this.ws = null;
-  // this.serverUrl = "wss://www.metesapi.com/api/ws";
-  this.serverUrl = "ws://localhost:7879/api/ws";
+  this.serverUrl = apiConfig.wsHost;
   this.roomInput = null;
   this.rooms = [];
   this.manager = null;

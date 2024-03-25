@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import Manager from "./manager";
+import Manager from "../../controllers/manager";
 import Button from '@mui/material/Button';
 import SendIcon from '@mui/icons-material/Send';
 import Avatar from '@mui/material/Avatar';
@@ -17,6 +17,7 @@ import GptFace from "./GptFace";
 import Contacts from "./Contacts";
 import MenuIcon from '@mui/icons-material/Menu';
 import axios from 'axios';
+import apiConfig from '../../controllers/variables/api';
 import './jarvis.css'
 
 const AudioChat = (handleDrawerOpen) => {
@@ -57,8 +58,7 @@ const AudioChat = (handleDrawerOpen) => {
 
   const fetchAgents = async () => {
     try {
-      // const response = await axios.get('https://www.metesapi.com/api/agents');
-      const response = await axios.get('http://localhost:7879/api/agents');
+      const response = await axios.get(`${apiConfig.apiHost}/agents`);
       const fetchedAgents = response.data;
 
       setAgents(fetchedAgents);
