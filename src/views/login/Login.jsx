@@ -1,11 +1,7 @@
 import React, { Component } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
-
 import Auth from "../../controllers/auth";
-// import Footer from "components/Footer/Footer";
-
 import logo from "../../assets/logo.png";
-
 import "./Login.css";
 
 class Login extends Component {
@@ -15,71 +11,70 @@ class Login extends Component {
       redirectToReferrer: false,
       username: "",
       password: "",
-      errorMessage: ""
+      errorMessage: "",
+      isLoggingIn: false,
     };
   }
 
-  login = event => {
+  login = async (event) => {
     event.preventDefault();
-    event.stopPropagation();
 
-    return Auth.authenticate(this.state.username, this.state.password).then(
-      ({ success, message }) => {
-        if (!success) {
-          this.setState({
-            errorMessage: message || "Wrong."
-          });
-        }
+    const { username, password } = this.state;
 
-        if (success) {
-          Auth.syncDetails();
-          this.setState({ redirectToReferrer: true });
-        }
-      }
-    );
+    if (!username || !password) {
+      this.setState({ errorMessage: 'Please fill in all fields.' });
+      return;
+    }
+
+    this.setState({ isLoggingIn: true });
+
+    const response = await Auth.authenticate(username, password);
+
+    if (!response.success) {
+      this.setState({
+        errorMessage: response.message || "Login failed.",
+        isLoggingIn: false,
+      });
+    } else {
+      Auth.syncDetails();
+      this.setState({ redirectToReferrer: true });
+    }
   };
 
   clearErrorMessage = () => {
     this.setState({ errorMessage: "" });
   };
 
-  handleChange = event => {
+  handleChange = (event) => {
     this.setState({
       [event.target.id]: event.target.value
     });
   };
 
   render() {
-    if(Auth.isAuthenticated === true) {
+    if(Auth.isAuthenticated) {
       return <Navigate to={{ pathname: "/" }} />;
     }
-    // this.clearErrorMessage();
-    let { from } = this.props.location.state || { from: { pathname: "/" } };
-    let { redirectToReferrer, errorMessage } = this.state;
 
-    if (redirectToReferrer) return <Navigate to={from} />;
+    const { redirectToReferrer, errorMessage, isLoggingIn } = this.state;
 
-    // const message = `You must log in to view the page at ${from.pathname}`;
+    if (redirectToReferrer) return <Navigate to={this.props.location.state?.from || '/'} />;
 
     return (
       <div className="login-container">
         <div className="login-box">
           {errorMessage && (
             <div className="error-message">
+              <button className="close-btn" onClick={this.clearErrorMessage}>×</button>
               {errorMessage}
-              <button className="close-btn" onClick={this.clearErrorMessage}>
-                X
-              </button>
             </div>
           )}
-
           <div className="logo-container">
-            <img src={logo} alt="logo_image" className="logo" />
+            <img src={logo} alt="logo" className="logo" />
           </div>
-
           <form onSubmit={this.login}>
             <div className="form-group">
-              <label htmlFor="username">Username</label>
+              {/* <label htmlFor="username">Username</label> */}
               <input
                 className="login-label"
                 id="username"
@@ -87,10 +82,12 @@ class Login extends Component {
                 placeholder="Username"
                 value={this.state.username}
                 onChange={this.handleChange}
+                disabled={isLoggingIn}
+                required
               />
             </div>
             <div className="form-group">
-              <label htmlFor="password">Password</label>
+              {/* <label htmlFor="password">Password</label> */}
               <input
                 className="login-label"
                 id="password"
@@ -98,11 +95,13 @@ class Login extends Component {
                 placeholder="Password"
                 value={this.state.password}
                 onChange={this.handleChange}
+                disabled={isLoggingIn}
+                required
               />
             </div>
             <div className="text-center">
-              <button onClick={this.login} className="login-btn">
-                Login
+              <button type="submit" className="login-btn" disabled={isLoggingIn}>
+                {isLoggingIn ? "Logging in..." : "Login"}
               </button>
             </div>
           </form>
@@ -111,6 +110,7 @@ class Login extends Component {
     );
   }
 }
+
 
 function LoginWrapper() {
   const location = useLocation();
