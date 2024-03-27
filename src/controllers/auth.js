@@ -77,7 +77,7 @@ class Auth {
       .catch((error) => {
         return {
           success: false,
-          message: (error[0] && error[0].description) || "Wrong."
+          message: (error[0] && error[0].description) || "Wrong username or password."
         };
       })
   }
