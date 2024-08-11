@@ -184,13 +184,30 @@ const AudioChat = (handleDrawerOpen) => {
       setIsOtherSideTyping(false);
       const now = new Date();
       const msElapsed = now.getTime() - lastMessageTimeRef.current.getTime();
-      setMessages(messages => [...messages, {
-        id: messages.length + 1,
-        text: message.text,
-        user: { name: "GPT" },
-        timestamp: now,
-        ms: msElapsed
-      }]);
+      
+      setMessages(messages => {
+        const lastMessage = messages[messages.length - 1];
+        if (lastMessage && lastMessage.user.name === "GPT") {
+          // If the last message is from GPT, concatenate the new text
+          const updatedMessages = [...messages];
+          updatedMessages[updatedMessages.length - 1] = {
+            ...lastMessage,
+            text: lastMessage.text + " " + message.text,
+            timestamp: now,
+            ms: msElapsed
+          };
+          return updatedMessages;
+        } else {
+          // If the last message is not from GPT, add a new message
+          return [...messages, {
+            id: messages.length + 1,
+            text: message.text,
+            user: { name: "GPT" },
+            timestamp: now,
+            ms: msElapsed
+          }];
+        }
+      });
     } else if (message.stream) {
       if(isAudioEnabledRef.current) {
         if(message.stream === "<close_stream>") {
