@@ -43,6 +43,9 @@ const AudioChat = (handleDrawerOpen) => {
   const audioStreamerRef = useRef();
   const [isOtherSideTyping, setIsOtherSideTyping] = useState(false);
   const navigate = useNavigate();
+  const lastUserMessageTimeRef = useRef(null);
+  const TIME_THRESHOLD = 1000; // 1 second in milliseconds
+
 
   useEffect(() => {
     if (!Auth.isAuthenticated) {
@@ -170,8 +173,8 @@ const AudioChat = (handleDrawerOpen) => {
 
 
   const receiveChatMessage = (message) => {
+    const now = new Date();
     if (message.transcription) {
-      const now = new Date();
       const msElapsed = now.getTime() - lastMessageTimeRef.current.getTime();
       setMessages(messages => [...messages, {
         id: messages.length + 1,
@@ -180,15 +183,24 @@ const AudioChat = (handleDrawerOpen) => {
         timestamp: now,
         ms: msElapsed
       }]);
+      lastUserMessageTimeRef.current = now;
     } else if (message.text) {
+      const timeSinceLastUserMessage = now.getTime() - (lastUserMessageTimeRef.current?.getTime() || 0);
+      
+      // Ignore messages that arrive less than TIME_THRESHOLD after a user message
+      if (timeSinceLastUserMessage < TIME_THRESHOLD) {
+        console.log("Ignoring late message from previous request");
+        return;
+      }
+
       setIsOtherSideTyping(false);
-      const now = new Date();
       const msElapsed = now.getTime() - lastMessageTimeRef.current.getTime();
       
       setMessages(messages => {
         const lastMessage = messages[messages.length - 1];
+        
         if (lastMessage && lastMessage.user.name === "GPT") {
-          // If the last message is from GPT, concatenate the new text
+          // If the last message is from GPT, concatenate
           const updatedMessages = [...messages];
           updatedMessages[updatedMessages.length - 1] = {
             ...lastMessage,
@@ -198,7 +210,7 @@ const AudioChat = (handleDrawerOpen) => {
           };
           return updatedMessages;
         } else {
-          // If the last message is not from GPT, add a new message
+          // If it's a new response, add a new message
           return [...messages, {
             id: messages.length + 1,
             text: message.text,
@@ -221,8 +233,9 @@ const AudioChat = (handleDrawerOpen) => {
 
   const sendMessage = () => {
     play();
-    const timestamp = new Date(); // Get the current timestamp
-    lastMessageTimeRef.current = timestamp
+    const timestamp = new Date();
+    lastMessageTimeRef.current = timestamp;
+    lastUserMessageTimeRef.current = timestamp; // Update the last user message time
     let msg = { 
       id: messages.length + 1, 
       text, 
@@ -230,12 +243,12 @@ const AudioChat = (handleDrawerOpen) => {
       timestamp: timestamp,
       ms: 0 
     };
-    pauseAudio(false)
+    pauseAudio(false);
     Manager.send(msg.text, currentAgentId);
-    setMessages([...messages, msg]);
+    setMessages(prevMessages => [...prevMessages, msg]);
     setText("");
     handleOtherSideTyping();
-};
+  };
 
   const sendTextMessage = (textData) => {
     play()
