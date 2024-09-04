@@ -44,7 +44,7 @@ const AudioChat = (handleDrawerOpen) => {
   const [isOtherSideTyping, setIsOtherSideTyping] = useState(false);
   const navigate = useNavigate();
   const lastUserMessageTimeRef = useRef(null);
-  const TIME_THRESHOLD = 1000; // 1 second in milliseconds
+  const TIME_THRESHOLD = 400;
 
 
   useEffect(() => {

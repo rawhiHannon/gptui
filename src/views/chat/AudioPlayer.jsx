@@ -1,26 +1,18 @@
 import { useState, useEffect, useRef } from "react";
 
 const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef, onStreamComplete) => {
-  const audioQueue = useRef([]);
   const currentMessageAudioChunks = useRef([]);
-  const historyMessageAudioChunks = useRef([]);
   const streamCompleted = useRef(false);
-  const isProcessingAudio = useRef(false);
   const [isGptSpeaking, setIsGptSpeaking] = useState(false);
   const audioContextRef = useRef(null);
   const isPlaying = useRef(false);
-  let isAudioStreaming = false;
-  const sourceRef = useRef(null);
   const isPaused = useRef(false);
   const activeSources = useRef([]);
-  let isSpecialMessagePlaying = false;
-
 
   useEffect(() => {
     if (!audioContextRef.current) {
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       audioContextRef.current = new AudioContext();
-      // Resume audio context on user interaction for iOS compatibility
       const resumeAudioContext = () => {
         if (audioContextRef.current.state === "suspended") {
           audioContextRef.current.resume();
@@ -34,27 +26,20 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef, onStreamComplete
   }, []);
 
   useEffect(() => {
-    if (!isPlaying.current) {
-      setIsGptSpeaking(false);
-      if (onGptSpeakingChange) {
-        onGptSpeakingChange(false);
-      }
-    }
-  }, [isPlaying.current, onGptSpeakingChange]);
-
-  useEffect(() => {
     setIsGptSpeaking(isGptSpeaking);
     if (onGptSpeakingChange) {
       onGptSpeakingChange(isGptSpeaking);
     }
   }, [isGptSpeaking, onGptSpeakingChange]);
-  
+
   const pauseAudio = (paused) => {
-    let state = true;
-    if(paused === false) {
-      state = false
-    } 
-    isPaused.current = state;
+    isPaused.current = paused !== false;
+    if (isPaused.current) {
+      activeSources.current.forEach(source => source.stop());
+      activeSources.current = [];
+    } else {
+      playNextAudioChunk();
+    }
   };
 
   const playAudio = () => {
@@ -63,15 +48,12 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef, onStreamComplete
   };
 
   function playNextAudioChunk() {
-    if (isPlaying.current || isPaused.current) {
+    if (isPlaying.current || isPaused.current || currentMessageAudioChunks.current.length === 0) {
       return;
     }
 
-    // Check and potentially resume the AudioContext state for iOS
     if (audioContextRef.current.state === "suspended") {
-      audioContextRef.current.resume().then(() => {
-        startAudioPlayback();
-      });
+      audioContextRef.current.resume().then(startAudioPlayback);
     } else {
       startAudioPlayback();
     }
@@ -79,12 +61,11 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef, onStreamComplete
 
   function startAudioPlayback() {
     if (currentMessageAudioChunks.current.length === 0) {
+      console.log("No audio chunks to play");
       setIsGptSpeaking(false);
       isPlaying.current = false;
-      if(streamCompleted.current == true) {
-        if(onStreamComplete) {
-          onStreamComplete()
-        }
+      if (streamCompleted.current && onStreamComplete) {
+        onStreamComplete();
       }
       return;
     }
@@ -92,19 +73,21 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef, onStreamComplete
     setIsGptSpeaking(true);
     isPlaying.current = true;
 
-    const combinedBlob = new Blob([...currentMessageAudioChunks.current], { type: 'audio/mpeg' });
+    console.log("Starting playback of", currentMessageAudioChunks.current.length, "chunks");
+    const combinedBlob = new Blob(currentMessageAudioChunks.current, { type: 'audio/mpeg' });
     currentMessageAudioChunks.current = [];
 
     const reader = new FileReader();
     reader.onload = function() {
       const arrayBuffer = this.result;
+      console.log("Decoding audio data", arrayBuffer.byteLength, "bytes");
       audioContextRef.current.decodeAudioData(arrayBuffer, playBuffer, errorHandler);
     };
     reader.readAsArrayBuffer(combinedBlob);
   }
 
-  
   function playBuffer(audioBuffer) {
+    console.log("Playing audio buffer", audioBuffer.duration, "seconds");
     const source = audioContextRef.current.createBufferSource();
     audioContextRef.current.resume().then(() => {
       source.buffer = audioBuffer;
@@ -115,39 +98,30 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef, onStreamComplete
       source.onended = () => {
         isPlaying.current = false;
         setIsGptSpeaking(false);
-        isSpecialMessagePlaying = false;
         activeSources.current = activeSources.current.filter(s => s !== source);
         playNextAudioChunk();
       };
     });
   }
-  
+
   const stop = () => {
-    // Stop the current audio source if it's playing
     activeSources.current.forEach(source => source.stop());
-    activeSources.current = []; // Clear the list of active sources.
-
-    // Clear the audio queues
-    audioQueue.current = [];
+    activeSources.current = [];
     currentMessageAudioChunks.current = [];
-
-    // Reset states
     isPlaying.current = false;
-    isProcessingAudio.current = false;
     setIsGptSpeaking(false);
-
     if (onGptSpeakingChange) {
       onGptSpeakingChange(false);
     }
   };
 
-
   function errorHandler(e) {
-    console.error("Error decoding audio data: " + e.err);
+    console.error("Error decoding audio data:", e);
     isPlaying.current = false;
     setIsGptSpeaking(false);
+    playNextAudioChunk();
   }
-  
+
   const base64ToBlob = (base64, contentType) => {
     try {
       const binaryString = window.atob(base64);
@@ -158,45 +132,41 @@ const useAudioPlayer = (onGptSpeakingChange, isAudioEnabledRef, onStreamComplete
       const byteArray = new Uint8Array(byteNumbers);
       return new Blob([byteArray], { type: contentType });
     } catch (e) {
-      console.log(base64)
+      console.error("Error converting base64 to Blob:", e);
       return new Blob([], { type: contentType });
     }
-
   };
 
-  const addAudioToQueue  = (stream) => {
+  const addAudioToQueue = (stream) => {
+    if (!isAudioEnabledRef.current) {
+      console.log("Audio is disabled");
+      return;
+    }
+
     if (stream.startsWith("<filler>")) {
       const base64Audio = stream.split("<filler>")[1].trim();
       const audioBlob = base64ToBlob(base64Audio, 'audio/mpeg');
-  
-      // Stop current audio if playing
       stop();
-      isSpecialMessagePlaying = true;
       currentMessageAudioChunks.current = [audioBlob];
       streamCompleted.current = false;
       playNextAudioChunk();
-      return;
-    }
-    if (stream === "<cancel>") {
+    } else if (stream === "<cancel>") {
       stop();
-      return;
-    }
-    if (stream === "<stream_complete>") {
+    } else if (stream === "<stream_complete>") {
       streamCompleted.current = true;
+      playNextAudioChunk(); // Ensure any remaining audio is played
     } else {
-        if(!isAudioEnabledRef.current) {
-          return
-        }
-        streamCompleted.current = false;
-        const audioBlob = base64ToBlob(stream, 'audio/mpeg');
-        currentMessageAudioChunks.current.push(audioBlob);
+      streamCompleted.current = false;
+      const audioBlob = base64ToBlob(stream, 'audio/mpeg');
+      currentMessageAudioChunks.current.push(audioBlob);
+      console.log("Added audio chunk, total chunks:", currentMessageAudioChunks.current.length);
 
-        if (isPlaying.current == false && isPaused.current == false) {
-          playNextAudioChunk();
-        }
+      if (!isPlaying.current && !isPaused.current) {
+        playNextAudioChunk();
       }
+    }
   };
-  
+
   return {
     addAudioToQueue,
     stop,
