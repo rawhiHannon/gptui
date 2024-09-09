@@ -80,10 +80,13 @@ self.connectToWebsocket = async function() {
       console.error('Error initializing WebSocket connection:', error);
   }
   return new Promise((resolve, reject) => {
-    this.ws = new WebSocket(this.serverUrl + "?bearer=" + uniqueKey + "&host=agentbuddy.me");
+    this.ws = new WebSocket(this.serverUrl + "?bearer=" + uniqueKey);
     this.ws.addEventListener('open', (event) => { this.onWebsocketOpen(event, resolve) });
     this.ws.addEventListener('message', (event) => { this.handleNewMessage(event) });
     this.ws.addEventListener('close', (event) => { this.handleClose(event) });
+    this.ws.onerror = function(event) {
+      console.error("WebSocket error observed:", event);
+    };
   })
 }
 

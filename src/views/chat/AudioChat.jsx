@@ -48,9 +48,9 @@ const AudioChat = (handleDrawerOpen) => {
 
 
   useEffect(() => {
-    if (!Auth.isAuthenticated) {
-      navigate('/login', { replace: true });
-    }
+    // if (!Auth.isAuthenticated) {
+    //   navigate('/login', { replace: true });
+    // }
   }, [Auth.isAuthenticated]);
 
 
@@ -69,7 +69,7 @@ const AudioChat = (handleDrawerOpen) => {
 
   const fetchAgents = async () => {
     try {
-      const response = await axios.get(`${apiConfig.apiHost}/agents`);
+      const response = await axios.get(`${apiConfig.apiHost}/demoAssistants`);
       const fetchedAgents = response.data;
 
       setAgents(fetchedAgents);
