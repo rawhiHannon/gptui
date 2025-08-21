@@ -17,7 +17,7 @@ const AgentsApp = () => {
 
   useEffect(() => {
     const fetchAgents = async () => {
-      const response = await axios.get('https://chat.agentaichat.com:2096/api/agents');
+      const response = await axios.get('https://dev.agentaichat.com/api/agents');
       setAgents(response.data);
     };
     fetchAgents();

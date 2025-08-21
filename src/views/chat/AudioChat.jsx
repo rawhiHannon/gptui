@@ -11,8 +11,8 @@ import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import IconButton from '@mui/material/IconButton';
 import AudioRecorder from './AudioRecorder';
 import SpeechRecognition from './SpeechRecognition'
-import AudioStreamer from "./AudioStreamer";
-import useAudioPlayer from './AudioPlayer'; // Adjust the path as per your project structure
+import AudioStreamer from "./AudioStreamerNew";
+import useAudioPlayer from './AudioPlayerPCM'; // Adjust the path as per your project structure
 import GptFace from "./GptFace";
 import Contacts from "./Contacts";
 import MenuIcon from '@mui/icons-material/Menu';
@@ -355,44 +355,64 @@ const AudioChat = (handleDrawerOpen) => {
 
       <div className="chat">
       <div className="person-info">
-      <IconButton onClick={toggleSidebar} style={{color: '#3f6eb5', outline: 'none', marginRight: "10px" }} disabled={!isOnline}><MenuIcon /></IconButton>
-      <Avatar sx={{ bgcolor: "gray" }} style={{ width: "40px", height: "40px", marginRight: "10px" }} />
+        <IconButton 
+          onClick={toggleSidebar} 
+          style={{color: '#3f6eb5', outline: 'none', marginRight: "10px", flexShrink: 0 }} 
+          disabled={!isOnline}
+        >
+          <MenuIcon />
+        </IconButton>
+        
+        {/* <Avatar 
+          sx={{ bgcolor: "gray" }} 
+          style={{ width: "40px", height: "40px", marginRight: "8px", flexShrink: 0 }} 
+        /> */}
 
-    <div className="person-details">
-      <h2>{currentAgentName}</h2>
-      {/* Conditionally render the "Online" text */}
-      {isOnline && <p>Online</p>}
-    </div>
-    <div className="icon-container">
-    <AudioStreamer 
-      status={isOnline && currentAgentId} 
-      onAudioStream={handleAudioStream} 
-      onStreamStarted={handleStreamStarted}
-      toggleAudio={toggleAudio} 
-      talkingStatus={isGptSpeaking} 
-      isAudioEnabled={isAudioEnabled} 
-      ref={audioStreamerRef}
-    />
-
-    <div className="speaker-icon-container">
-
-        {isAudioEnabled ? (
-          <IconButton style={{ color: '#3f6eb5', outline: 'none' }}><VolumeUpIcon onClick={toggleAudio} /></IconButton>
-        ) : (
-          <IconButton style={{ color: '#3f6eb5', outline: 'none' }}><VolumeOffIcon onClick={toggleAudio} /></IconButton>
-        )}
-      </div>
-
-      <IconButton onClick={toggleMenu} style={{ color: '#3f6eb5', outline: 'none', marginRight: '15px' }}><MoreVertIcon /></IconButton>
-      {showMenu && (
-        <div ref={menuRef} className="menu">
-          <div className="menu-item" onClick={clearHistory}>Clear History</div>
-          <div className="menu-item">Settings</div>
-          <div className="menu-item" onClick={signout}>Sign out</div>
+        <div className="person-details">
+        <h2 className="agent-name">{currentAgentName}</h2>
+          {/* Conditionally render the "Online" text */}
+          {isOnline && <p className="status">Online</p>}
         </div>
-      )}
-    </div>
-  </div>
+        
+        <div className="icon-container">
+          <AudioStreamer 
+            status={isOnline && currentAgentId} 
+            onAudioStream={handleAudioStream} 
+            onStreamStarted={handleStreamStarted}
+            toggleAudio={toggleAudio} 
+            talkingStatus={isGptSpeaking} 
+            isAudioEnabled={isAudioEnabled} 
+            ref={audioStreamerRef}
+          />
+
+          <div className="speaker-icon-container">
+            {isAudioEnabled ? (
+              <IconButton style={{ color: '#3f6eb5', outline: 'none' }}>
+                <VolumeUpIcon onClick={toggleAudio} />
+              </IconButton>
+            ) : (
+              <IconButton style={{ color: '#3f6eb5', outline: 'none' }}>
+                <VolumeOffIcon onClick={toggleAudio} />
+              </IconButton>
+            )}
+          </div>
+
+          <IconButton 
+            onClick={toggleMenu} 
+            style={{ color: '#3f6eb5', outline: 'none', marginRight: '15px' }}
+          >
+            <MoreVertIcon />
+          </IconButton>
+          
+          {showMenu && (
+            <div ref={menuRef} className="menu">
+              <div className="menu-item" onClick={clearHistory}>Clear History</div>
+              <div className="menu-item">Settings</div>
+              <div className="menu-item" onClick={signout}>Sign out</div>
+            </div>
+          )}
+        </div>
+      </div>
 
     <div className="chat-messages" ref={chatMessagesRef}>
         {messages.map(message => (
@@ -428,8 +448,7 @@ const AudioChat = (handleDrawerOpen) => {
     )}
 
       </div>
-      <div className="chat-input">
-        {/* <IconButton style={{ outline: 'none' }}><AddIcon /></IconButton> */}
+      {/* <div className="chat-input">
         <input
           type="text"
           value={text}
@@ -445,7 +464,7 @@ const AudioChat = (handleDrawerOpen) => {
               </Button>
             :  <AudioRecorder onRecordingComplete={handleAudio} status={isOnline && currentAgentId} />
         }
-      </div>
+      </div> */}
     </div>
     </div>
     </div>
