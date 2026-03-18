@@ -1,39 +1,37 @@
 import apiConfig from './variables/api';
 
-async function generateUniqueKey() {
-  const localStorageKey = 'uniqueDeviceKey';
+async function getDemoToken() {
+  const storageKey = 'demo_token';
+  const expiryKey = 'demo_token_expires';
 
-  // Check if the key already exists in local storage
-  let uniqueKey = localStorage.getItem(localStorageKey);
-  if (uniqueKey) {
-      return uniqueKey;
+  // Reuse cached token if still valid (with 60s buffer)
+  const cached = localStorage.getItem(storageKey);
+  const expiry = localStorage.getItem(expiryKey);
+  if (cached && expiry && Date.now() / 1000 < Number(expiry) - 60) {
+    return cached;
   }
 
-  // Collecting device-specific information
-  const screenResolution = `${window.screen.width}x${window.screen.height}`;
-  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const language = navigator.language;
-  const randomPart = Math.random().toString(36).substring(2, 15);
-
-  // Combining the information into a single string
-  const combinedString = `${screenResolution}-${timezone}-${language}-${randomPart}`;
-
-  // Hashing the combined string using a SHA-256 hash function
-  uniqueKey = await sha256(combinedString);
-
-  // Store the new key in local storage
-  localStorage.setItem(localStorageKey, uniqueKey);
-
-  return uniqueKey;
+  const res = await fetch(`${apiConfig.apiHost}/auth/demo`, { method: 'POST' });
+  const data = await res.json();
+  if (data.access_token) {
+    localStorage.setItem(storageKey, data.access_token);
+    localStorage.setItem(expiryKey, String(data.expires_at));
+    return data.access_token;
+  }
+  throw new Error('Failed to get demo token');
 }
 
-// SHA-256 hash function returning a Promise that resolves to a hex string
-async function sha256(str) {
-  // Encoding str into a Uint8Array
-  const buffer = new TextEncoder().encode(str);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-  // Converting the ArrayBuffer to a hex string
-  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+function getDeviceKey() {
+  const key = 'demo_device_key';
+  let deviceKey = localStorage.getItem(key);
+  if (deviceKey) return deviceKey;
+
+  // Generate a stable random device key
+  const arr = new Uint8Array(16);
+  crypto.getRandomValues(arr);
+  deviceKey = Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+  localStorage.setItem(key, deviceKey);
+  return deviceKey;
 }
 
 function WebSocketsManager() {
@@ -73,14 +71,15 @@ self.isWSConnected = function() {
 
 //TODO: handle reject
 self.connectToWebsocket = async function() {
-  var uniqueKey = ""
+  var token = ""
   try {
-    uniqueKey = await generateUniqueKey();
+    token = await getDemoToken();
   } catch (error) {
-      console.error('Error initializing WebSocket connection:', error);
+      console.error('Error getting demo token:', error);
   }
+  var deviceKey = getDeviceKey();
   return new Promise((resolve, reject) => {
-    this.ws = new WebSocket(this.serverUrl + "?bearer=" + uniqueKey);
+    this.ws = new WebSocket(this.serverUrl + "?bearer=" + token + "&device=" + deviceKey);
     this.ws.addEventListener('open', (event) => { this.onWebsocketOpen(event, resolve) });
     this.ws.addEventListener('message', (event) => { this.handleNewMessage(event) });
     this.ws.addEventListener('close', (event) => { this.handleClose(event) });
@@ -204,11 +203,12 @@ self.sendStreamBytes = async function(blob, receiverIdStr) {
   const receiverId = parseInt(receiverIdStr, 10);
 
   blob.arrayBuffer().then(audioBuffer => {
-      const receiverBuffer = new ArrayBuffer(4);
-      const receiverView = new DataView(receiverBuffer);
-      receiverView.setInt32(0, receiverId, true);
+      const headerBuffer = new ArrayBuffer(8);
+      const headerView = new DataView(headerBuffer);
+      headerView.setInt32(0, 0, true);          // groupID = 0 (demo)
+      headerView.setInt32(4, receiverId, true);  // receiverID
 
-      const combinedBuffer = concatenateBuffers(receiverBuffer, audioBuffer);
+      const combinedBuffer = concatenateBuffers(headerBuffer, audioBuffer);
       this.ws.send(combinedBuffer);
   });
 };

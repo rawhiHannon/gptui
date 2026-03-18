@@ -1,15 +1,10 @@
-import { useState } from 'react'
 import './App.css'
 import AudioChat from "./AudioChat";
 
-function ChatApp(handleDrawerOpen) {
-  const [count, setCount] = useState(0)
-
+function ChatApp() {
   return (
     <div className="App">
-      {/* <Chat /> */}
-      <AudioChat handleDrawerOpen={handleDrawerOpen} />
-      {/* <SpeechRecognition /> */}
+      <AudioChat />
     </div>
   )
 }

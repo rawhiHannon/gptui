@@ -20,14 +20,15 @@ import './AudioStreamer.css';
 import RecordRTC, { StereoAudioRecorder } from 'recordrtc';
 
 const AudioStreamer = forwardRef(({
-  onAudioStream, 
-  onStreamStarted, 
-  toggleAudio, 
-  status, 
-  talkingStatus, 
+  onAudioStream,
+  onStreamStarted,
+  toggleAudio,
+  status,
+  talkingStatus,
   isAudioEnabled,
   initialState,
-  fsmStates
+  fsmStates,
+  inline
 }, ref) => {
   
   // Component state
@@ -717,6 +718,41 @@ useEffect(() => {
 
   const hasValidFSM = fsmStates && Object.keys(fsmStates).length > 0;
 
+  const inlineContent = (shouldShowDialog) ? (
+    <div className="inline-call-panel">
+      {isDialing ? renderDialing() : null}
+      {isStreaming ? (
+        <div className="compact-call-interface">
+          {hasValidFSM ? renderProgressHeader() : (
+            <div className="simple-header">
+              <h3>AI Call</h3>
+              {currentState && <span>{currentState}</span>}
+            </div>
+          )}
+
+          {getPathTrail().length > 0 && renderProgressStepper()}
+          {renderParameters()}
+          {renderControls()}
+        </div>
+      ) : null}
+    </div>
+  ) : null;
+
+  if (inline) {
+    return (
+      <div>
+        <button
+          onClick={handleIconClick}
+          className={`call-btn ${!status ? 'disabled' : ''} ${isStreaming ? 'active' : ''}`}
+          disabled={!status}
+        >
+          {isStreaming ? <CallEndIcon /> : <HeadsetIcon />}
+        </button>
+        {inlineContent}
+      </div>
+    );
+  }
+
   return (
     <div>
       <button
@@ -727,12 +763,12 @@ useEffect(() => {
         {isStreaming ? <CallEndIcon /> : <HeadsetIcon />}
       </button>
 
-      <Dialog 
-        open={shouldShowDialog} 
-        onClose={preventDialogClose} 
-        maxWidth="sm" 
-        fullWidth 
-        PaperProps={{ 
+      <Dialog
+        open={shouldShowDialog}
+        onClose={preventDialogClose}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
           className: 'compact-call-dialog'
         }}
       >
@@ -746,7 +782,7 @@ useEffect(() => {
                   {currentState && <span>{currentState}</span>}
                 </div>
               )}
-              
+
               {getPathTrail().length > 0 && renderProgressStepper()}
               {renderParameters()}
               {renderControls()}

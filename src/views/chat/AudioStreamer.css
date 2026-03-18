@@ -1053,3 +1053,219 @@
     height: 16px;
   }
 }
+
+/* ===== Dark Theme Overrides for Inline Mode ===== */
+
+.inline-call-panel .compact-dialog-content,
+.inline-call-panel .compact-call-interface {
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.inline-call-panel .progress-header {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: var(--border);
+}
+
+.inline-call-panel .state-name {
+  color: var(--text-primary);
+}
+
+.inline-call-panel .progress-description {
+  color: var(--text-secondary);
+}
+
+.inline-call-panel .progress-bar-track {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.inline-call-panel .simple-header {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: var(--border);
+}
+
+.inline-call-panel .simple-header h3 {
+  color: var(--text-primary);
+}
+
+.inline-call-panel .stepper-container {
+  background: transparent;
+  border-color: var(--border);
+}
+
+.inline-call-panel .stepper-nav {
+  background: var(--bg-card);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+.inline-call-panel .stepper-nav:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+}
+
+.inline-call-panel .step {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.inline-call-panel .step.completed:not(.single) {
+  background: rgba(0, 212, 170, 0.06);
+  border-color: rgba(0, 212, 170, 0.15);
+}
+
+.inline-call-panel .step.current:not(.single) {
+  background: rgba(108, 92, 231, 0.1);
+  border-color: rgba(108, 92, 231, 0.3);
+}
+
+.inline-call-panel .step.single {
+  background: rgba(108, 92, 231, 0.08);
+  border-color: rgba(108, 92, 231, 0.25);
+}
+
+.inline-call-panel .step-label {
+  color: var(--text-secondary);
+}
+
+.inline-call-panel .step.completed .step-label {
+  color: var(--green);
+}
+
+.inline-call-panel .step.current .step-label {
+  color: var(--accent-light);
+}
+
+.inline-call-panel .step-connector {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.inline-call-panel .step-connector.completed {
+  background: var(--green);
+}
+
+.inline-call-panel .params-section {
+  background: transparent;
+}
+
+.inline-call-panel .params-title {
+  color: var(--text-primary);
+}
+
+.inline-call-panel .params-count {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
+}
+
+.inline-call-panel .param-chip {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: var(--border);
+}
+
+.inline-call-panel .param-chip:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.inline-call-panel .param-chip.collected {
+  background: rgba(0, 212, 170, 0.06);
+  border-color: rgba(0, 212, 170, 0.15);
+}
+
+.inline-call-panel .param-chip.pending {
+  background: rgba(255, 193, 7, 0.06);
+  border-color: rgba(255, 193, 7, 0.15);
+}
+
+.inline-call-panel .param-name {
+  color: var(--text-primary);
+}
+
+.inline-call-panel .param-value {
+  color: var(--text-secondary);
+}
+
+.inline-call-panel .param-chip.collected .param-value {
+  color: var(--green);
+}
+
+.inline-call-panel .param-chip.pending .param-value {
+  color: #ffc107;
+}
+
+.inline-call-panel .call-controls {
+  background: transparent;
+  border-color: var(--border);
+}
+
+.inline-call-panel .status-badge {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+.inline-call-panel .status-badge.speaking {
+  background: rgba(0, 212, 170, 0.08);
+  color: var(--green);
+  border-color: rgba(0, 212, 170, 0.2);
+}
+
+.inline-call-panel .call-timer {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+.inline-call-panel .control-btn {
+  background: var(--bg-card);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+.inline-call-panel .control-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.inline-call-panel .control-btn.muted {
+  background: rgba(255, 71, 87, 0.08);
+  color: var(--red);
+  border-color: rgba(255, 71, 87, 0.2);
+}
+
+.inline-call-panel .dialing-screen {
+  background: transparent;
+}
+
+.inline-call-panel .dial-text h3 {
+  color: var(--text-primary);
+}
+
+.inline-call-panel .dial-text p {
+  color: var(--text-secondary);
+}
+
+.inline-call-panel .details-panel {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: var(--border);
+}
+
+.inline-call-panel .details-header {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: var(--border);
+}
+
+.inline-call-panel .details-header span {
+  color: var(--text-secondary);
+}
+
+.inline-call-panel .detail-label {
+  color: var(--text-muted);
+}
+
+.inline-call-panel .detail-value {
+  color: var(--text-primary);
+}
+
+.inline-call-panel .current-pulse {
+  border-color: var(--accent);
+}
