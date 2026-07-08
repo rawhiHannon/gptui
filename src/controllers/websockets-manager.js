@@ -11,7 +11,10 @@ async function getDemoToken() {
     return cached;
   }
 
-  const res = await fetch(`${apiConfig.apiHost}/auth/demo`, { method: 'POST' });
+  const res = await fetch(`${apiConfig.apiHost}/auth/demo`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
   const data = await res.json();
   if (data.access_token) {
     localStorage.setItem(storageKey, data.access_token);
@@ -167,7 +170,9 @@ self.sendChatMessage = async function(msg, receiver) {
   this.ws.send(JSON.stringify({
     action: 'chat',
     message: msg,
-    receiver: receiverId
+    receiver: receiverId,
+    group_id: 0,
+    tenant_id: 0
   }));
 }
 
@@ -177,7 +182,9 @@ self.sendStreamMessage = async function(msg, receiver) {
   this.ws.send(JSON.stringify({
     action: 'stream',
     audio: msg,
-    receiver: receiverId
+    receiver: receiverId,
+    group_id: 0,
+    tenant_id: 0
   }));
 }
 
@@ -186,7 +193,9 @@ self.sendVoiceMessage = async function(msg, receiver) {
   this.ws.send(JSON.stringify({
     action: 'voice',
     audio: msg,
-    receiver: receiver
+    receiver: receiver,
+    group_id: 0,
+    tenant_id: 0
   }));
 }  
 

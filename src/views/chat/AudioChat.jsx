@@ -10,12 +10,16 @@ import CallEndIcon from '@mui/icons-material/CallEnd';
 import PhoneIcon from '@mui/icons-material/LocalPhone';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import IconButton from '@mui/material/IconButton';
 import AudioEngine from "./AudioEngine";
 import useAudioPlayer from './AudioPlayerPCM';
 import GraphicEqIcon from '@mui/icons-material/GraphicEq';
+import PersonIcon from '@mui/icons-material/Person';
+import AiAvatar from './AiAvatar';
 import axios from 'axios';
 import apiConfig from '../../controllers/variables/api';
+import { LiveAvatarSession } from '@heygen/liveavatar-web-sdk';
 import './jarvis.css';
 import logo from '../../assets/logo.png';
 
@@ -25,6 +29,9 @@ const AudioChat = () => {
   const [play] = useSound(boopSfx);
   const [isOnline, setIsOnline] = useState(false);
   const [isOnCall, setOnCall] = useState(false);
+  const isOnCallRef = useRef(false);
+  const isStreamingRef = useRef(false);
+  const pendingMessagesRef = useRef([]);
   const [isGptSpeaking, setIsGptSpeaking] = useState(false);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
   const isAudioEnabledRef = useRef(false);
@@ -39,6 +46,12 @@ const AudioChat = () => {
   const lastUserMessageTimeRef = useRef(null);
   const TIME_THRESHOLD = 400;
 
+  // Avatar state
+  const avatarSessionRef = useRef(null);
+  const avatarVideoRef = useRef(null);
+  const [avatarReady, setAvatarReady] = useState(false);
+  const [avatarSupported, setAvatarSupported] = useState(true); // assume supported until proven otherwise
+
   // Call state from AudioEngine
   const [callStatus, setCallStatus] = useState({
     isStreaming: false,
@@ -46,10 +59,75 @@ const AudioChat = () => {
     isMicOn: true,
     callTime: 0,
   });
+  const isExternalAgent = () => {
+    const agent = getCurrentAgent();
+    return agent?.conversation_type === 'external';
+  };
 
   const handleEndCall = () => {
+    isStreamingRef.current = false;
+    pendingMessagesRef.current = [];
     if (audioEngineRef.current) {
       audioEngineRef.current.endCall();
+    }
+    stopAvatarSession();
+  };
+
+  const startAvatarSession = async () => {
+    if (!avatarSupported) return;
+    try {
+      const res = await axios.post(`${apiConfig.apiHost}/demoAvatar/token`);
+      const { session_token } = res.data;
+      if (!session_token) {
+        setAvatarSupported(false);
+        return;
+      }
+
+      const session = new LiveAvatarSession(session_token, {
+        voiceChat: false,
+      });
+
+      session.on("session.state_changed", (state) => {
+        if (state === "CONNECTED") {
+          setAvatarReady(true);
+        } else if (state === "DISCONNECTED") {
+          // Clear ref so audio falls back to PCM player
+          avatarSessionRef.current = null;
+          setAvatarReady(false);
+        }
+      });
+
+      session.on("session.disconnected", () => {
+        avatarSessionRef.current = null;
+        setAvatarReady(false);
+        // Auto-reconnect if still on a call
+        if (isOnCallRef.current) {
+          console.log("[Avatar] Session dropped, reconnecting...");
+          setTimeout(() => startAvatarSession(), 1000);
+        }
+      });
+
+      session.on("session.stream_ready", () => {
+        if (avatarVideoRef.current) {
+          session.attach(avatarVideoRef.current);
+        }
+      });
+
+      await session.start();
+      avatarSessionRef.current = session;
+    } catch (err) {
+      console.error("Avatar not available:", err.message);
+      setAvatarSupported(false);
+    }
+  };
+
+  const stopAvatarSession = async () => {
+    if (avatarSessionRef.current) {
+      try {
+        await avatarSessionRef.current.stop();
+      } catch (e) {}
+      avatarSessionRef.current = null;
+      setAvatarReady(false);
     }
   };
 
@@ -125,52 +203,102 @@ const AudioChat = () => {
     localStorage.setItem(agentSpecificKey, JSON.stringify(messages));
   }, [messages]);
 
+  const addTranscriptionMessage = (msg) => {
+    const msElapsed = msg.timestamp.getTime() - lastMessageTimeRef.current.getTime();
+    setMessages(messages => [...messages, {
+      id: messages.length + 1,
+      text: msg.transcription,
+      user: { name: "rawhi" },
+      timestamp: msg.timestamp,
+      ms: msElapsed
+    }]);
+    lastUserMessageTimeRef.current = msg.timestamp;
+  };
+
+  const addTextMessage = (msg) => {
+    const timeSinceLastUserMessage = msg.timestamp.getTime() - (lastUserMessageTimeRef.current?.getTime() || 0);
+    if (timeSinceLastUserMessage < TIME_THRESHOLD) return;
+
+    setIsOtherSideTyping(false);
+    const msElapsed = msg.timestamp.getTime() - lastMessageTimeRef.current.getTime();
+
+    setMessages(messages => {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage && lastMessage.user.name === "GPT") {
+        const updatedMessages = [...messages];
+        updatedMessages[updatedMessages.length - 1] = {
+          ...lastMessage,
+          text: lastMessage.text + " " + msg.text,
+          timestamp: msg.timestamp,
+          ms: msElapsed
+        };
+        return updatedMessages;
+      } else {
+        return [...messages, {
+          id: messages.length + 1,
+          text: msg.text,
+          user: { name: "GPT" },
+          timestamp: msg.timestamp,
+          ms: msElapsed
+        }];
+      }
+    });
+  };
+
+  const flushPendingMessages = () => {
+    const pending = pendingMessagesRef.current;
+    pendingMessagesRef.current = [];
+    for (const msg of pending) {
+      if (msg.transcription) addTranscriptionMessage(msg);
+      else if (msg.text) addTextMessage(msg);
+    }
+  };
+
   const receiveChatMessage = (message) => {
     const now = new Date();
-    if (message.transcription) {
-      const msElapsed = now.getTime() - lastMessageTimeRef.current.getTime();
-      setMessages(messages => [...messages, {
-        id: messages.length + 1,
-        text: message.transcription,
-        user: { name: "rawhi" },
-        timestamp: now,
-        ms: msElapsed
-      }]);
-      lastUserMessageTimeRef.current = now;
-    } else if (message.text) {
-      const timeSinceLastUserMessage = now.getTime() - (lastUserMessageTimeRef.current?.getTime() || 0);
-      if (timeSinceLastUserMessage < TIME_THRESHOLD) return;
+    const external = isExternalAgent();
 
-      setIsOtherSideTyping(false);
-      const msElapsed = now.getTime() - lastMessageTimeRef.current.getTime();
-
-      setMessages(messages => {
-        const lastMessage = messages[messages.length - 1];
-        if (lastMessage && lastMessage.user.name === "GPT") {
-          const updatedMessages = [...messages];
-          updatedMessages[updatedMessages.length - 1] = {
-            ...lastMessage,
-            text: lastMessage.text + " " + message.text,
-            timestamp: now,
-            ms: msElapsed
-          };
-          return updatedMessages;
-        } else {
-          return [...messages, {
-            id: messages.length + 1,
-            text: message.text,
-            user: { name: "GPT" },
-            timestamp: now,
-            ms: msElapsed
-          }];
-        }
-      });
+    if (message.transcription && !external) {
+      if (!isOnCallRef.current) return;
+      const msg = { transcription: message.transcription, timestamp: now };
+      if (!isStreamingRef.current) {
+        pendingMessagesRef.current.push(msg);
+        return;
+      }
+      addTranscriptionMessage(msg);
+    } else if (message.text && !external) {
+      if (!isOnCallRef.current) return;
+      const msg = { text: message.text, timestamp: now };
+      if (!isStreamingRef.current) {
+        pendingMessagesRef.current.push(msg);
+        return;
+      }
+      addTextMessage(msg);
     } else if (message.stream) {
       if (isAudioEnabledRef.current) {
-        if (message.stream === "<close_stream>") {
+        if (message.stream === "<close_stream>" || message.stream === "<service_error>") {
           handleEndCall();
-        } else {
+        } else if (message.stream === "<cancel>") {
+          if (avatarSessionRef.current) {
+            try { avatarSessionRef.current.interrupt(); } catch (e) {
+              avatarSessionRef.current = null;
+              setAvatarReady(false);
+            }
+          }
           addAudioToQueue(message.stream);
+        } else {
+          if (avatarSessionRef.current) {
+            try {
+              avatarSessionRef.current.repeatAudio(message.stream);
+            } catch (e) {
+              // Session died — clear ref and fall back to PCM
+              avatarSessionRef.current = null;
+              setAvatarReady(false);
+              addAudioToQueue(message.stream);
+            }
+          } else {
+            addAudioToQueue(message.stream);
+          }
         }
       }
     }
@@ -203,6 +331,7 @@ const AudioChat = () => {
 
   const closeStream = () => {
     stop();
+    isOnCallRef.current = false;
     setOnCall(false);
     Manager.sendStream("<close_stream>", currentAgentIdRef.current);
   };
@@ -210,14 +339,21 @@ const AudioChat = () => {
   const handleAudioStream = (data) => {
     if (data === "<start_stream>") {
       pauseAudio();
+      isOnCallRef.current = true;
       setOnCall(true);
       Manager.sendStream(data, currentAgentId);
+      // Start avatar session for external agents
+      if (isExternalAgent()) {
+        startAvatarSession();
+      }
       return;
     }
     if (data === "<close_stream>") {
       stop();
+      isOnCallRef.current = false;
       setOnCall(false);
       Manager.sendStream(data, currentAgentId);
+      stopAvatarSession();
       return;
     }
     Manager.sendStreamBytes(data, currentAgentId);
@@ -255,6 +391,9 @@ const AudioChat = () => {
   };
 
   const isActive = callStatus.isStreaming || callStatus.isDialing;
+  const external = isExternalAgent();
+  const showAvatar = external && avatarSupported;
+  const showFace = external && !avatarSupported;
 
   return (
     <div className="landing-page">
@@ -263,7 +402,14 @@ const AudioChat = () => {
         ref={audioEngineRef}
         onAudioStream={handleAudioStream}
         onStreamStarted={handleStreamStarted}
-        onStatusChange={setCallStatus}
+        onStatusChange={(status) => {
+          const wasStreaming = isStreamingRef.current;
+          isStreamingRef.current = status.isStreaming;
+          setCallStatus(status);
+          if (!wasStreaming && status.isStreaming) {
+            flushPendingMessages();
+          }
+        }}
       />
 
       {/* Navbar */}
@@ -273,7 +419,7 @@ const AudioChat = () => {
             {showMobileSidebar ? <CloseIcon fontSize="small" /> : <MenuIcon fontSize="small" />}
           </IconButton>
           <img src={logo} alt="Logo" className="navbar-logo" />
-          <span className="navbar-title">VoiceAI</span>
+          <span className="navbar-title">RingEn</span>
         </div>
       </nav>
 
@@ -292,8 +438,8 @@ const AudioChat = () => {
             {agents.map((agent) => (
               <div
                 key={agent.id}
-                className={`agent-item ${currentAgentId == agent.id ? 'active' : ''}`}
-                onClick={() => { setCurrentAgentId(agent.id); setShowMobileSidebar(false); }}
+                className={`agent-item ${currentAgentId == agent.id ? 'active' : ''} ${isActive ? 'disabled' : ''}`}
+                onClick={() => { if (!isActive) { setCurrentAgentId(agent.id); setShowMobileSidebar(false); } }}
               >
                 {agent.profile_pic ? (
                   <img src={agent.profile_pic} alt={agent.name} className="agent-avatar" />
@@ -311,7 +457,7 @@ const AudioChat = () => {
           </div>
         </div>
 
-        {/* Right: Call bar + Transcript */}
+        {/* Right: Call bar + Transcript/Avatar */}
         <div className="call-transcript-panel">
           {currentAgentId ? (
             <>
@@ -338,13 +484,15 @@ const AudioChat = () => {
                       <div className="call-bar-timer">
                         {formatCallTime(callStatus.callTime)}
                       </div>
-                      <button
-                        onClick={toggleAudio}
-                        className={`call-ctrl-btn ${!isAudioEnabled ? 'off' : ''}`}
-                        title={isAudioEnabled ? 'Mute Audio' : 'Unmute Audio'}
-                      >
-                        {isAudioEnabled ? <VolumeUpIcon fontSize="small" /> : <VolumeOffIcon fontSize="small" />}
-                      </button>
+                      {!showAvatar && (
+                        <button
+                          onClick={toggleAudio}
+                          className={`call-ctrl-btn ${!isAudioEnabled ? 'off' : ''}`}
+                          title={isAudioEnabled ? 'Mute Audio' : 'Unmute Audio'}
+                        >
+                          {isAudioEnabled ? <VolumeUpIcon fontSize="small" /> : <VolumeOffIcon fontSize="small" />}
+                        </button>
+                      )}
                       <button
                         onClick={handleToggleMic}
                         className={`call-ctrl-btn ${!callStatus.isMicOn ? 'off' : ''}`}
@@ -378,61 +526,104 @@ const AudioChat = () => {
                       >
                         <PhoneIcon fontSize="small" />
                       </button>
-                      <button
-                        onClick={clearHistory}
-                        className="call-ctrl-btn"
-                        title="Clear conversation"
-                      >
-                        <CloseIcon fontSize="small" />
-                      </button>
+                      {!external && messages.length > 0 && (
+                        <button
+                          onClick={clearHistory}
+                          className="clear-history-btn"
+                          title="Clear conversation history"
+                        >
+                          <DeleteSweepIcon style={{ fontSize: 16 }} />
+                          <span>Clear</span>
+                        </button>
+                      )}
                     </>
                   )}
                 </div>
               </div>
 
-              {/* Transcript */}
-              <div className="transcript-area" ref={chatMessagesRef}>
-                {messages.length === 0 ? (
-                  <div className="transcript-empty">
-                    <div className="transcript-empty-icon">
-                      <GraphicEqIcon />
+              {/* Avatar view for external agents with LiveAvatar */}
+              {showAvatar ? (
+                <div className={`avatar-container${avatarReady ? ' live' : ''}`}>
+                  <video
+                    ref={avatarVideoRef}
+                    autoPlay
+                    playsInline
+                    className="avatar-video"
+                  />
+                  {!isActive && !avatarReady && (
+                    <div className="avatar-placeholder">
+                      <AiAvatar isSpeaking={false} size={160} />
+                      <h3>Start a call</h3>
+                      <p>Hit the call button to begin a voice conversation with {currentAgentName}.</p>
                     </div>
-                    <h3>Start a conversation</h3>
-                    <p>Hit the call button to begin a voice conversation with {currentAgentName}.</p>
-                  </div>
-                ) : (
-                  <>
-                    {messages.map(message => {
-                      const isUser = message.user.name === "rawhi";
-                      return (
-                        <div
-                          key={message.id}
-                          className={`message ${isUser ? 'me' : 'other'}`}
-                        >
-                          <div className="text">
-                            {message.text}
-                            <span className="message-time">
-                              {formatTime(new Date(message.timestamp))}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-
-                    {isOtherSideTyping && (
-                      <div className="message other">
-                        <div className="typing">
-                          <div className="dot-container">
-                            <div className="dot"></div>
-                            <div className="dot"></div>
-                            <div className="dot"></div>
-                          </div>
-                        </div>
-                      </div>
+                  )}
+                  {isActive && !avatarReady && (
+                    <div className="avatar-placeholder">
+                      <AiAvatar isSpeaking={true} size={160} />
+                      <p>Connecting avatar...</p>
+                    </div>
+                  )}
+                </div>
+              ) : showFace ? (
+                /* Animated orb fallback for external agents without LiveAvatar */
+                <div className="avatar-container">
+                  <div className="avatar-placeholder">
+                    {isActive ? (
+                      <AiAvatar isSpeaking={isGptSpeaking} size={200} />
+                    ) : (
+                      <>
+                        <AiAvatar isSpeaking={false} size={160} />
+                        <h3>Start a call</h3>
+                        <p>Hit the call button to begin a voice conversation with {currentAgentName}.</p>
+                      </>
                     )}
-                  </>
-                )}
-              </div>
+                  </div>
+                </div>
+              ) : (
+                /* Transcript view for standard agents */
+                <div className="transcript-area" ref={chatMessagesRef}>
+                  {messages.length === 0 ? (
+                    <div className="transcript-empty">
+                      <div className="transcript-empty-icon">
+                        <GraphicEqIcon />
+                      </div>
+                      <h3>Start a conversation</h3>
+                      <p>Hit the call button to begin a voice conversation with {currentAgentName}.</p>
+                    </div>
+                  ) : (
+                    <>
+                      {messages.map(message => {
+                        const isUser = message.user.name === "rawhi";
+                        return (
+                          <div
+                            key={message.id}
+                            className={`message ${isUser ? 'me' : 'other'}`}
+                          >
+                            <div className="text">
+                              {message.text}
+                              <span className="message-time">
+                                {formatTime(new Date(message.timestamp))}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {isOtherSideTyping && (
+                        <div className="message other">
+                          <div className="typing">
+                            <div className="dot-container">
+                              <div className="dot"></div>
+                              <div className="dot"></div>
+                              <div className="dot"></div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
             </>
           ) : (
             <div className="transcript-area">

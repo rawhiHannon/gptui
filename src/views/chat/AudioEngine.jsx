@@ -2,11 +2,15 @@ import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 're
 import useSound from 'use-sound';
 import boopSfx from './interface-124464.mp3';
 import voicecall from './phone-call.mp3';
-import RecordRTC, { StereoAudioRecorder } from 'recordrtc';
 
 /**
  * Headless audio engine — no UI at all.
  * Exposes state + controls via ref so the parent renders all buttons.
+ *
+ * Captures raw PCM16 at 16 kHz using AudioContext + ScriptProcessorNode.
+ * This produces continuous samples with no WAV headers and no inter-chunk
+ * discontinuities (unlike RecordRTC's timeSlice which wraps each chunk
+ * in a separate WAV file, causing clicks at chunk boundaries).
  */
 const AudioEngine = forwardRef(({ onAudioStream, onStreamStarted, onStatusChange }, ref) => {
   const [isStreaming, setIsStreaming] = useState(false);
@@ -15,7 +19,8 @@ const AudioEngine = forwardRef(({ onAudioStream, onStreamStarted, onStatusChange
   const [callTime, setCallTime] = useState(0);
 
   const callTimerRef = useRef(null);
-  const recorderRef = useRef(null);
+  const captureCtxRef = useRef(null);   // AudioContext for mic capture at 16 kHz
+  const processorRef = useRef(null);    // ScriptProcessorNode
   const streamRef = useRef(null);
   const dataChunksRef = useRef(0);
   const callManuallyTerminatedRef = useRef(false);
@@ -70,17 +75,32 @@ const AudioEngine = forwardRef(({ onAudioStream, onStreamStarted, onStatusChange
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
 
-      recorderRef.current = new RecordRTC(stream, {
-        type: 'audio',
-        recorderType: StereoAudioRecorder,
-        mimeType: 'audio/wav',
-        numberOfAudioChannels: 1,
-        desiredSampRate: 16000,
-        timeSlice: 200,
-        ondataavailable: handleDataAvailable
-      });
+      // Capture raw PCM16 at 16 kHz using AudioContext + ScriptProcessorNode.
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AudioCtx({ sampleRate: 16000 });
+      captureCtxRef.current = ctx;
 
-      recorderRef.current.startRecording();
+      const source = ctx.createMediaStreamSource(stream);
+      const processor = ctx.createScriptProcessor(4096, 1, 1); // 4096 samples @ 16kHz ≈ 256ms
+      processorRef.current = processor;
+
+      // Route through a zero-gain node so onaudioprocess fires (Chrome
+      // requires connection to destination) but no audio leaks to speakers.
+      const silentGain = ctx.createGain();
+      silentGain.gain.value = 0;
+      source.connect(processor);
+      processor.connect(silentGain);
+      silentGain.connect(ctx.destination);
+
+      processor.onaudioprocess = (e) => {
+        const float32 = e.inputBuffer.getChannelData(0);
+        const int16 = new Int16Array(float32.length);
+        for (let i = 0; i < float32.length; i++) {
+          const s = Math.max(-1, Math.min(1, float32[i]));
+          int16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+        }
+        handleDataAvailable(new Blob([int16.buffer]));
+      };
     } catch (err) {
       console.error("Error accessing audio:", err);
       endCall();
@@ -88,10 +108,16 @@ const AudioEngine = forwardRef(({ onAudioStream, onStreamStarted, onStatusChange
   };
 
   const cleanupAudio = () => {
-    if (recorderRef.current) {
-      try { recorderRef.current.stopRecording(() => {}); } catch (e) {}
-      recorderRef.current = null;
+    if (processorRef.current) {
+      processorRef.current.disconnect();
+      processorRef.current = null;
     }
+
+    if (captureCtxRef.current) {
+      captureCtxRef.current.close().catch(() => {});
+      captureCtxRef.current = null;
+    }
+
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => { try { track.stop(); } catch (e) {} });
       streamRef.current = null;
